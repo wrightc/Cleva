@@ -1,0 +1,9 @@
+{
+  "version": "1.4",
+  "custom": {
+    "getPuzzleUrl": "https://r5z52niby3qr6s3pzotbe37jjq0hqnvm.lambda-url.ca-central-1.on.aws/",
+    "generatePuzzleUrl": "https://maqp4wgj62tncsymjbbxrap4qe0pzhny.lambda-url.ca-central-1.on.aws/",
+    "submitScoreUrl": "https://ws2amzscdhghxgt5kgwttpvkny0gwygv.lambda-url.ca-central-1.on.aws/",
+    "getLeaderboardUrl": "https://jnh6mi4yhnosnpjqre6qvgoxci0lvkuf.lambda-url.ca-central-1.on.aws/"
+  }
+}
