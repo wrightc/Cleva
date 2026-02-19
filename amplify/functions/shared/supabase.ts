@@ -24,16 +24,6 @@ export function getSupabaseClient(): SupabaseClient {
   return client;
 }
 
-/** Returns CORS headers for Lambda function URL responses. */
-export function corsHeaders(origin?: string): Record<string, string> {
-  const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Headers': 'Content-Type, x-admin-secret',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  };
-}
-
 /** Build a standard JSON response for Lambda function URLs. */
 export function jsonResponse(
   statusCode: number,
@@ -44,7 +34,6 @@ export function jsonResponse(
     statusCode,
     headers: {
       'Content-Type': 'application/json',
-      ...corsHeaders(),
       ...extraHeaders,
     },
     body: JSON.stringify(body),
