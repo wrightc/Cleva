@@ -8,13 +8,18 @@ import { Timer } from '../components/Timer';
 
 export function GameView() {
   const navigate = useNavigate();
-  const { state, selectLetter, removeLetter, completedGame } = useGameState();
+  const { state, selectLetter, removeLetter, updateElapsedMs, completedGame } = useGameState();
 
   const { formattedTime, elapsedMs } = useTimer({
     date: state.puzzle?.date ?? null,
     running: state.status === 'playing',
     initialElapsedMs: state.elapsedMs,
   });
+
+  // Keep game state's elapsedMs in sync so it's accurate when the game completes
+  useEffect(() => {
+    updateElapsedMs(elapsedMs);
+  }, [elapsedMs, updateElapsedMs]);
 
   // Redirect to result if already played
   useEffect(() => {

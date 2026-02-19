@@ -28,6 +28,7 @@ interface UseGameStateReturn {
   removeLetter: () => void;
   clearError: () => void;
   markSubmitted: (playerName: string) => void;
+  updateElapsedMs: (ms: number) => void;
   completedGame: CompletedGame | null;
 }
 
@@ -161,15 +162,9 @@ export function useGameState(): UseGameStateReturn {
     });
   }, []);
 
-  // Keep elapsedMs in state synced (updated by useTimer externally via this callback)
   const updateElapsedMs = useCallback((ms: number) => {
     setState((s) => ({ ...s, elapsedMs: ms }));
   }, []);
-
-  // Expose updateElapsedMs via a workaround: store it on the state ref
-  // The GameView will drive elapsed time via useTimer and call updateElapsedMs
-  // We expose it through state by using an effect-based approach in GameView instead.
-  void updateElapsedMs; // suppress unused warning
 
   const clearError = useCallback(() => {
     setState((s) => ({ ...s, errorMessage: null }));
@@ -197,6 +192,7 @@ export function useGameState(): UseGameStateReturn {
     removeLetter,
     clearError,
     markSubmitted,
+    updateElapsedMs,
     completedGame,
   };
 }
