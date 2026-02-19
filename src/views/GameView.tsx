@@ -90,6 +90,13 @@ export function GameView() {
         ))}
       </div>
 
+      {/* Instructions */}
+      {selectedLetterIndex === null && !errorMessage && (
+        <p className="game-instructions">
+          Tap a letter to remove it — each step must form a valid word. Shrink down to one letter to win!
+        </p>
+      )}
+
       {/* Preview of resulting word */}
       {previewWord && (
         <div className="preview-word" aria-live="polite" aria-label={`Result: ${previewWord}`}>

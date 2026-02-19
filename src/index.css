@@ -205,6 +205,16 @@ body {
   text-decoration: line-through;
 }
 
+/* ── Game instructions ─────────────────────────────────────── */
+
+.game-instructions {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.5;
+  max-width: 320px;
+}
+
 /* ── Preview word ──────────────────────────────────────────── */
 
 .preview-word {
