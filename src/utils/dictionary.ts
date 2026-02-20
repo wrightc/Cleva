@@ -44,3 +44,13 @@ export function isValidWord(word: string): boolean {
 export function getDictionary(): Set<string> | null {
   return wordSet;
 }
+
+/** Returns true if at least one valid word can be formed by removing one letter. */
+export function canContinue(word: string): boolean {
+  if (!wordSet) throw new Error('Dictionary not loaded yet.');
+  for (let i = 0; i < word.length; i++) {
+    const candidate = word.slice(0, i) + word.slice(i + 1);
+    if (wordSet.has(candidate.toUpperCase())) return true;
+  }
+  return false;
+}

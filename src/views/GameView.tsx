@@ -1,14 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameState } from '../hooks/useGameState';
 import { useTimer } from '../hooks/useTimer';
+import { useDefinition } from '../hooks/useDefinition';
 import { LetterTile } from '../components/LetterTile';
 import { WordChain } from '../components/WordChain';
 import { Timer } from '../components/Timer';
 
 export function GameView() {
   const navigate = useNavigate();
-  const { state, selectLetter, removeLetter, updateElapsedMs, completedGame } = useGameState();
+  const { state, selectLetter, removeLetter, updateElapsedMs, clearPenalty, completedGame } = useGameState();
 
   const { formattedTime, elapsedMs } = useTimer({
     date: state.puzzle?.date ?? null,
@@ -30,6 +31,21 @@ export function GameView() {
       });
     }
   }, [state.status, navigate, completedGame, elapsedMs]);
+
+  // Penalty countdown — clear penalty state after it expires
+  const [, forceRender] = useState(0);
+  useEffect(() => {
+    if (!state.penaltyUntil) return;
+    const remaining = state.penaltyUntil - Date.now();
+    if (remaining <= 0) { clearPenalty(); return; }
+    const t = setTimeout(() => { clearPenalty(); forceRender((n) => n + 1); }, remaining);
+    return () => clearTimeout(t);
+  }, [state.penaltyUntil, clearPenalty]);
+
+  const isPenalty = !!state.penaltyUntil && Date.now() < state.penaltyUntil;
+
+  // Definition for the current word
+  const { definition, loading: defLoading } = useDefinition(state.currentWord);
 
   // ── Loading state ──────────────────────────────────────────────────────────
   if (state.status === 'loading') {
@@ -64,7 +80,8 @@ export function GameView() {
       ? currentWord.slice(0, selectedLetterIndex) + currentWord.slice(selectedLetterIndex + 1)
       : null;
 
-  const stepNumber = chain.length; // chain includes the starting word as step 0, so length = current step
+  const stepNumber = chain.length;
+  const isDisabled = isPenalty || state.isStuck;
 
   return (
     <div className="view">
@@ -85,20 +102,28 @@ export function GameView() {
             index={i}
             isSelected={selectedLetterIndex === i}
             isPreviewRemoved={selectedLetterIndex === i}
-            onClick={selectLetter}
+            onClick={isDisabled ? () => {} : selectLetter}
           />
         ))}
       </div>
 
-      {/* Instructions */}
-      {selectedLetterIndex === null && !errorMessage && (
+      {/* Status messages: penalty / stuck / instructions */}
+      {isPenalty ? (
+        <p className="game-instructions game-instructions--penalty" role="alert">
+          Not a valid word — 2-second penalty. Wait before your next move.
+        </p>
+      ) : state.isStuck ? (
+        <p className="game-instructions game-instructions--stuck" role="alert">
+          No valid words can be formed from here. You're stuck — try again tomorrow!
+        </p>
+      ) : selectedLetterIndex === null && !errorMessage ? (
         <p className="game-instructions">
           Tap a letter to remove it — each step must form a valid word. Shrink down to one letter to win!
         </p>
-      )}
+      ) : null}
 
       {/* Preview of resulting word */}
-      {previewWord && (
+      {previewWord && !isDisabled && (
         <div className="preview-word" aria-live="polite" aria-label={`Result: ${previewWord}`}>
           <span className="preview-label">Result:</span>
           {currentWord.split('').map((letter, i) =>
@@ -115,8 +140,8 @@ export function GameView() {
         </div>
       )}
 
-      {/* Inline error message */}
-      {errorMessage && (
+      {/* Inline error message (non-penalty errors) */}
+      {errorMessage && !isPenalty && (
         <div className="error-message" role="alert" aria-live="assertive">
           {errorMessage}
         </div>
@@ -126,11 +151,26 @@ export function GameView() {
       <button
         className="btn btn--primary btn--large"
         onClick={removeLetter}
-        disabled={selectedLetterIndex === null}
-        aria-disabled={selectedLetterIndex === null}
+        disabled={selectedLetterIndex === null || isDisabled}
+        aria-disabled={selectedLetterIndex === null || isDisabled}
       >
         Remove Letter
       </button>
+
+      {/* Word definition */}
+      {(definition || defLoading) && (
+        <div className="word-definition" aria-live="polite">
+          {defLoading ? (
+            <span className="word-definition__loading">Looking up definition…</span>
+          ) : (
+            <>
+              <span className="word-definition__word">{currentWord.toLowerCase()}</span>
+              {' — '}
+              <span className="word-definition__text">{definition}</span>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Progress chain */}
       <WordChain chain={chain} />

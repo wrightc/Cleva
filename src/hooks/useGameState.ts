@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { loadDictionary, isValidWord } from '../utils/dictionary';
+import { loadDictionary, isValidWord, canContinue } from '../utils/dictionary';
 import { fetchPuzzle } from '../utils/api';
 import type { GameState, Puzzle, CompletedGame } from '../types';
 
@@ -27,6 +27,7 @@ interface UseGameStateReturn {
   selectLetter: (index: number) => void;
   removeLetter: () => void;
   clearError: () => void;
+  clearPenalty: () => void;
   markSubmitted: (playerName: string) => void;
   updateElapsedMs: (ms: number) => void;
   completedGame: CompletedGame | null;
@@ -44,6 +45,8 @@ export function useGameState(): UseGameStateReturn {
     errorMessage: null,
     fatalError: null,
     elapsedMs: 0,
+    penaltyUntil: null,
+    isStuck: false,
   });
 
   const [completedGame, setCompletedGame] = useState<CompletedGame | null>(
@@ -107,6 +110,8 @@ export function useGameState(): UseGameStateReturn {
   const selectLetter = useCallback((index: number) => {
     setState((s) => {
       if (s.status !== 'playing') return s;
+      // Block input during penalty
+      if (s.penaltyUntil !== null && Date.now() < s.penaltyUntil) return s;
       // Toggle selection
       const newIndex = s.selectedLetterIndex === index ? null : index;
       return { ...s, selectedLetterIndex: newIndex, errorMessage: null };
@@ -116,16 +121,19 @@ export function useGameState(): UseGameStateReturn {
   const removeLetter = useCallback(() => {
     setState((s) => {
       if (s.status !== 'playing' || s.selectedLetterIndex === null) return s;
+      // Block input during penalty
+      if (s.penaltyUntil !== null && Date.now() < s.penaltyUntil) return s;
 
       const idx = s.selectedLetterIndex;
       const newWord = s.currentWord.slice(0, idx) + s.currentWord.slice(idx + 1);
 
-      // Validate the resulting word
+      // Validate the resulting word — apply 2-second penalty on failure
       if (!isValidWord(newWord)) {
         return {
           ...s,
           selectedLetterIndex: null,
           errorMessage: `"${newWord}" is not a valid word`,
+          penaltyUntil: Date.now() + 2000,
         };
       }
 
@@ -148,9 +156,13 @@ export function useGameState(): UseGameStateReturn {
           currentWord: newWord,
           selectedLetterIndex: null,
           errorMessage: null,
+          penaltyUntil: null,
           status: 'complete',
         };
       }
+
+      // Check if the player is now stuck (no valid one-letter removals)
+      const stuck = !canContinue(newWord);
 
       return {
         ...s,
@@ -158,6 +170,8 @@ export function useGameState(): UseGameStateReturn {
         currentWord: newWord,
         selectedLetterIndex: null,
         errorMessage: null,
+        penaltyUntil: null,
+        isStuck: stuck,
       };
     });
   }, []);
@@ -168,6 +182,10 @@ export function useGameState(): UseGameStateReturn {
 
   const clearError = useCallback(() => {
     setState((s) => ({ ...s, errorMessage: null }));
+  }, []);
+
+  const clearPenalty = useCallback(() => {
+    setState((s) => ({ ...s, penaltyUntil: null, errorMessage: null }));
   }, []);
 
   const markSubmitted = useCallback((playerName: string) => {
@@ -191,6 +209,7 @@ export function useGameState(): UseGameStateReturn {
     selectLetter,
     removeLetter,
     clearError,
+    clearPenalty,
     markSubmitted,
     updateElapsedMs,
     completedGame,

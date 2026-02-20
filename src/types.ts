@@ -44,6 +44,8 @@ export interface GameState {
   errorMessage: string | null;   // inline move error (not fatal)
   fatalError: string | null;     // API/load error
   elapsedMs: number;
+  penaltyUntil: number | null;   // epoch ms when 2-second penalty expires
+  isStuck: boolean;              // no valid next moves exist
 }
 
 /** Stored in localStorage when a puzzle is completed */
