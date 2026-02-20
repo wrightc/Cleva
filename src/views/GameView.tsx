@@ -45,7 +45,7 @@ export function GameView() {
   const isPenalty = !!state.penaltyUntil && Date.now() < state.penaltyUntil;
 
   // Definition for the current word
-  const { definition, loading: defLoading } = useDefinition(state.currentWord);
+  const { definition, notFound: defNotFound, loading: defLoading } = useDefinition(state.currentWord);
 
   // ── Loading state ──────────────────────────────────────────────────────────
   if (state.status === 'loading') {
@@ -81,7 +81,7 @@ export function GameView() {
       : null;
 
   const stepNumber = chain.length;
-  const isDisabled = isPenalty || state.isStuck;
+  const isDisabled = isPenalty || state.isStuck || currentWord.length <= 2;
 
   return (
     <div className="view">
@@ -118,7 +118,7 @@ export function GameView() {
         </p>
       ) : selectedLetterIndex === null && !errorMessage ? (
         <p className="game-instructions">
-          Tap a letter to remove it — each step must form a valid word. Shrink down to one letter to win!
+          Tap a letter to remove it — each step must form a valid word. Shrink down to two letters to win!
         </p>
       ) : null}
 
@@ -158,7 +158,7 @@ export function GameView() {
       </button>
 
       {/* Word definition */}
-      {(definition || defLoading) && (
+      {(definition || defNotFound || defLoading) && (
         <div className="word-definition" aria-live="polite">
           {defLoading ? (
             <span className="word-definition__loading">Looking up definition…</span>
@@ -166,7 +166,9 @@ export function GameView() {
             <>
               <span className="word-definition__word">{currentWord.toLowerCase()}</span>
               {' — '}
-              <span className="word-definition__text">{definition}</span>
+              <span className="word-definition__text">
+                {definition ?? 'no definition found'}
+              </span>
             </>
           )}
         </div>

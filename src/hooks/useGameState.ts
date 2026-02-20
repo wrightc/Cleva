@@ -139,8 +139,8 @@ export function useGameState(): UseGameStateReturn {
 
       const newChain = [...s.chain, newWord];
 
-      // Check win condition: single letter
-      if (newWord.length === 1) {
+      // Check win condition: two-letter word
+      if (newWord.length === 2) {
         const completed: CompletedGame = {
           date: s.puzzle!.date,
           chain: newChain,

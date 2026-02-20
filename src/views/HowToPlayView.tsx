@@ -1,5 +1,5 @@
 export function HowToPlayView() {
-  const exampleChain = ['STRANGE', 'STRANG', 'TRANG', 'RANG', 'RAN', 'AN', 'A'];
+  const exampleChain = ['ABRIDGED', 'BRIDGED', 'RIDGED', 'RIDGE', 'RIDE', 'RID', 'ID'];
 
   return (
     <div className="view">
@@ -9,8 +9,8 @@ export function HowToPlayView() {
         <section className="how-to-section">
           <h2>The Goal</h2>
           <p>
-            Each day you're given a <strong>7-letter word</strong>. Your goal is to reduce it to a
-            single letter by removing one letter at a time — where every step must form a valid
+            Each day you're given an <strong>8-letter word</strong>. Your goal is to reduce it to a
+            two-letter word by removing one letter at a time — where every step must form a valid
             English word.
           </p>
         </section>
@@ -28,8 +28,8 @@ export function HowToPlayView() {
             ))}
           </div>
           <p className="how-to-note">
-            STRANGE → STRANG (remove E) → TRANG (remove S) → RANG (remove T) → RAN (remove G) →
-            AN (remove R) → A (remove N)
+            ABRIDGED → BRIDGED (remove A) → RIDGED (remove B) → RIDGE (remove D) →
+            RIDE (remove G) → RID (remove E) → ID (remove R)
           </p>
         </section>
 
@@ -51,7 +51,7 @@ export function HowToPlayView() {
             Faster is better! Ties are broken by fewer extra steps, then earlier submission.
           </p>
           <p>
-            The minimum number of steps is always <strong>6</strong> (to go from 7 letters to 1).
+            The minimum number of steps is always <strong>6</strong> (to go from 8 letters to 2).
           </p>
         </section>
 

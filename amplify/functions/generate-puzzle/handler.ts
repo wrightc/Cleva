@@ -18,16 +18,13 @@ import { getSupabaseClient, jsonResponse } from '../shared/supabase.js';
 import { validateWord } from '../shared/validator.js';
 import type { FunctionUrlEvent } from '../shared/types.js';
 
-// Pre-validated fallback words (used if Claude API fails all retries)
+// Pre-validated 8-letter fallback words (used if Claude API fails all retries)
 const FALLBACK_WORDS: string[] = [
-  'STRANGE', 'STRAINS', 'PLAYERS', 'STARTED', 'TURNING', 'GARDENS', 'ANSWERS',
-  'WORKING', 'HOLDING', 'FARMERS', 'MATTERS', 'ATHERS', 'PAINTED', 'CREATED',
-  'NEAREST', 'HUNTERS', 'LASTING', 'MASTERS', 'GRANTED', 'WESTERN', 'SHARPEN',
-  'STRINGS', 'PLANETS', 'TRAINED', 'TRAVELS', 'SLANTED', 'PLANTED', 'CHANGER',
-  'BLASTER', 'PRATERS', 'RANTERS', 'STANDER', 'RANTING', 'STARING', 'RATINGS',
-  'GRASPER', 'RECOUNT', 'STAMPER', 'TRAMPLE', 'GARNERS', 'STRANDS', 'STANDUP',
-  'READING', 'LOADING', 'BEADING', 'LEADING', 'HEADING', 'TRADING', 'WARDING',
-  'WANDERS', 'ANDERS', 'LANDERS',
+  'CHANGERS', 'CHARGERS', 'PLANTERS', 'BLASTERS', 'PLASTERS', 'CHATTERS',
+  'CLATTERS', 'FLATTERS', 'PATTERNS', 'SPATTERS', 'STARTING', 'GRANTING',
+  'SLANTING', 'ABRIDGED', 'ABRIDGES', 'ABUTTERS', 'BOUNDERS', 'POINTERS',
+  'STRANGER', 'SWEATING', 'STANDERS', 'STINGERS', 'BRINGERS', 'STACKING',
+  'TRACKING', 'STACKERS', 'CRACKERS', 'TRACKERS', 'SMACKERS', 'STARLING',
 ];
 
 interface GenerationResult {
@@ -48,11 +45,11 @@ async function generateWithClaude(
     messages.push({
       role: 'user',
       content:
-        'Return a single 7-letter English word only — no explanation, punctuation, or surrounding text. ' +
+        'Return a single 8-letter English word only — no explanation, punctuation, or surrounding text. ' +
         'The word must be common and recognizable to a general adult audience. ' +
         'Exclude proper nouns, abbreviations, hyphenated words, and words requiring diacritical marks. ' +
         'The word should work well for a letter-removal puzzle where each step removing one letter ' +
-        'creates another valid English word.',
+        'creates another valid English word, ending at a 2-letter word.',
     });
   } else {
     const failureList = previousFailures
@@ -62,8 +59,8 @@ async function generateWithClaude(
       role: 'user',
       content:
         `The following words were rejected:\n${failureList}\n\n` +
-        'Return a different single 7-letter English word only — no explanation, punctuation, or surrounding text. ' +
-        'The word must be common, recognizable, and form a chain of valid English words when letters are removed one at a time.',
+        'Return a different single 8-letter English word only — no explanation, punctuation, or surrounding text. ' +
+        'The word must be common, recognizable, and form a chain of valid English words when letters are removed one at a time, ending at a 2-letter word.',
     });
   }
 
@@ -103,8 +100,8 @@ async function generatePuzzle(): Promise<GenerationResult> {
       continue;
     }
 
-    if (!word || word.length !== 7) {
-      failures.push({ word: word || '(empty)', reason: 'Response was not a 7-letter word' });
+    if (!word || word.length !== 8) {
+      failures.push({ word: word || '(empty)', reason: 'Response was not an 8-letter word' });
       continue;
     }
 

@@ -4,7 +4,7 @@
 -- Daily puzzles
 CREATE TABLE IF NOT EXISTS puzzles (
   date                  DATE        PRIMARY KEY,
-  word                  TEXT        NOT NULL CHECK (char_length(word) = 7),
+  word                  TEXT        NOT NULL CHECK (char_length(word) = 8),
   generated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   generation_attempts   INTEGER     NOT NULL DEFAULT 1,
   used_fallback         BOOLEAN     NOT NULL DEFAULT FALSE,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS leaderboard (
   date           DATE        NOT NULL REFERENCES puzzles(date) ON DELETE CASCADE,
   player_name    TEXT        NOT NULL CHECK (char_length(player_name) BETWEEN 2 AND 20),
   solve_time_ms  INTEGER     NOT NULL CHECK (solve_time_ms > 0),
-  step_count     INTEGER     NOT NULL CHECK (step_count >= 6),  -- minimum 6 steps for 7→1
+  step_count     INTEGER     NOT NULL CHECK (step_count >= 6),  -- minimum 6 steps for 8→2
   submitted_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   ip_hash        TEXT        NOT NULL  -- SHA-256 of IP, never plaintext
 );

@@ -37,8 +37,8 @@ function getNeighbors(word: string): string[] {
 export function validateWord(word: string, timeoutMs = 5000): ValidationResult {
   const normalized = word.trim().toUpperCase();
 
-  if (normalized.length !== 7) {
-    return { solvable: false, reason: `Word "${word}" is not 7 letters long` };
+  if (normalized.length !== 8) {
+    return { solvable: false, reason: `Word "${word}" is not 8 letters long` };
   }
 
   const dictionary = getWordSet();
@@ -70,8 +70,8 @@ export function validateWord(word: string, timeoutMs = 5000): ValidationResult {
 
       const newPath = [...path, neighbor];
 
-      // A single letter is the win condition
-      if (neighbor.length === 1) {
+      // A two-letter word is the win condition
+      if (neighbor.length === 2) {
         return { solvable: true, path: newPath };
       }
 
