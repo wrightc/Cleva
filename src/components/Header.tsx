@@ -1,6 +1,11 @@
 import { NavLink } from 'react-router-dom';
 
-export function Header() {
+interface HeaderProps {
+  trippy: boolean;
+  onToggleTrippy: () => void;
+}
+
+export function Header({ trippy, onToggleTrippy }: HeaderProps) {
   return (
     <header className="header">
       <div className="header-inner">
@@ -18,6 +23,14 @@ export function Header() {
             How to Play
           </NavLink>
         </nav>
+        <button
+          className={`trippy-toggle${trippy ? ' trippy-toggle--on' : ''}`}
+          onClick={onToggleTrippy}
+          title={trippy ? 'Switch to normal mode' : 'Go trippy'}
+          aria-pressed={trippy}
+        >
+          🌈
+        </button>
       </div>
     </header>
   );

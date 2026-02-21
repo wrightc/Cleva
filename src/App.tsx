@@ -4,12 +4,15 @@ import { GameView } from './views/GameView';
 import { ResultView } from './views/ResultView';
 import { LeaderboardView } from './views/LeaderboardView';
 import { HowToPlayView } from './views/HowToPlayView';
+import { useTrippy } from './hooks/useTrippy';
 
 function App() {
+  const { trippy, toggle } = useTrippy();
+
   return (
     <BrowserRouter>
       <div className="app">
-        <Header />
+        <Header trippy={trippy} onToggleTrippy={toggle} />
         <main className="main">
           <Routes>
             <Route path="/" element={<GameView />} />
