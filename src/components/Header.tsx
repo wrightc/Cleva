@@ -10,7 +10,7 @@ export function Header({ trippy, onToggleTrippy }: HeaderProps) {
     <header className="header">
       <div className="header-inner">
         <NavLink to="/" className="header-title">
-          The Shrinking Word
+          LoseIt
         </NavLink>
         <nav className="header-nav">
           <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
