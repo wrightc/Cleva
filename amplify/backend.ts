@@ -68,8 +68,8 @@ const cronStack = backend.createStack('CronStack');
 // EventBridge Rule using aws-events (simpler, stable API)
 new Rule(cronStack, 'DailyPuzzleRule', {
   ruleName: 'shrinking-word-daily-puzzle',
-  description: "Generates the next day's Shrinking Word puzzle at midnight UTC",
-  schedule: Schedule.cron({ minute: '0', hour: '0' }),
+  description: "Generates today's LoseIt puzzle at midnight Eastern time (05:00 UTC)",
+  schedule: Schedule.cron({ minute: '0', hour: '5' }),
   targets: [new LambdaFunction(generatePuzzleLambda)],
 });
 

@@ -1,5 +1,6 @@
 export function HowToPlayView() {
   const exampleChain = ['ABRIDGED', 'BRIDGED', 'RIDGED', 'RIDGE', 'RIDE', 'RID', 'ID'];
+  const year = new Date().getFullYear();
 
   return (
     <div className="view">
@@ -40,7 +41,7 @@ export function HowToPlayView() {
             <li>Each resulting word must be a <strong>valid English word</strong>.</li>
             <li>You may <strong>not</strong> add letters, rearrange letters, or skip steps.</li>
             <li>There may be multiple valid solution paths — any correct path is accepted.</li>
-            <li>The puzzle resets every day at <strong>midnight UTC</strong>.</li>
+            <li>A new puzzle is available every day at <strong>midnight Eastern time</strong>.</li>
           </ul>
         </section>
 
@@ -64,6 +65,28 @@ export function HowToPlayView() {
           </ul>
         </section>
       </div>
+
+      <footer className="how-to-legal">
+        <p>
+          <strong>LoseIt</strong> is a free-to-play word puzzle game produced by{' '}
+          <strong>Cleva.Me Games</strong>. No purchase is necessary. This game involves no
+          wagering, gambling, or monetary rewards of any kind. Leaderboard scores are for
+          entertainment purposes only and carry no cash value.
+        </p>
+        <p>
+          Player names submitted to the leaderboard are stored publicly. Do not submit personal
+          information as your display name. Cleva.Me Games reserves the right to remove any
+          name at its discretion.
+        </p>
+        <p>
+          This game is provided "as is" without warranty of any kind. Cleva.Me Games is not
+          responsible for any interruptions in service, loss of data, or other issues arising
+          from use of this application.
+        </p>
+        <p>
+          &copy; {year} Cleva.Me Games. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 }

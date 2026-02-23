@@ -76,7 +76,7 @@ export function ResultView() {
     const formatted = new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString(
       'en-US', { month: 'long', day: 'numeric' }
     );
-    const text = `The Shrinking Word — ${formatted} | Solved in ${formattedTime} | ${window.location.origin}`;
+    const text = `LoseIt — ${formatted} | Solved in ${formattedTime} | ${window.location.origin}`;
     navigator.clipboard.writeText(text).then(() => {
       setShareMessage('Copied to clipboard!');
       setTimeout(() => setShareMessage(''), 2000);
@@ -121,6 +121,12 @@ export function ResultView() {
         <button className="btn btn--secondary" onClick={handleShare}>
           {shareMessage || 'Share Result'}
         </button>
+
+        {/* Come back tomorrow */}
+        <p className="result-comeback">
+          Come back tomorrow for a new word! A new puzzle is available every day at{' '}
+          <strong>midnight Eastern time</strong>.
+        </p>
 
         {/* Score submission */}
         {!submitted ? (

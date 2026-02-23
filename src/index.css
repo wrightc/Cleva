@@ -746,6 +746,32 @@ body {
   font-size: 0.95rem;
 }
 
+/* ── Result comeback message ─────────────────────────────────── */
+
+.result-comeback {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* ── How to Play legal footer ────────────────────────────────── */
+
+.how-to-legal {
+  width: 100%;
+  border-top: 1.5px solid var(--color-border);
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.how-to-legal p {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
 /* ── Trippy Toggle Button ────────────────────────────────────── */
 
 .trippy-toggle {

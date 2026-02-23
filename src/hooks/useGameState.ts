@@ -18,8 +18,9 @@ function saveCompletedGame(game: CompletedGame) {
   localStorage.setItem(`${COMPLETED_KEY_PREFIX}${game.date}`, JSON.stringify(game));
 }
 
-function getTodayUtc(): string {
-  return new Date().toISOString().split('T')[0];
+function getTodayEastern(): string {
+  // Use Eastern time (America/New_York) so the puzzle rolls over at midnight ET
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 }
 
 interface UseGameStateReturn {
@@ -34,7 +35,7 @@ interface UseGameStateReturn {
 }
 
 export function useGameState(): UseGameStateReturn {
-  const today = getTodayUtc();
+  const today = getTodayEastern();
 
   const [state, setState] = useState<GameState>({
     puzzle: null,

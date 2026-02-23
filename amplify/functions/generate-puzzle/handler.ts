@@ -80,10 +80,8 @@ async function generatePuzzle(): Promise<GenerationResult> {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const supabase = getSupabaseClient();
 
-  // Target date: tomorrow UTC
-  const tomorrow = new Date();
-  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-  const targetDate = tomorrow.toISOString().split('T')[0];
+  // Target date: today in Eastern time (cron fires at 05:00 UTC = midnight ET)
+  const targetDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
   const failures: Array<{ word: string; reason: string }> = [];
   let attempts = 0;
