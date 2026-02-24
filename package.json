@@ -27,6 +27,7 @@
     "@aws-amplify/backend": "^1.21.0",
     "@aws-amplify/backend-cli": "^1.8.2",
     "@aws-amplify/backend-function": "^1.17.0",
+    "@aws-sdk/client-sns": "^3.996.0",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
