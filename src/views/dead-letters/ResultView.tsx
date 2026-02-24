@@ -40,7 +40,7 @@ export function ResultView() {
 
   if (!completedGame) return null;
 
-  const { date, word, elapsedMs, penaltySeconds, incorrectSubmissions, hintUsed } = completedGame;
+  const { date, word, elapsedMs, penaltySeconds, incorrectSubmissions, hintsUsed } = completedGame;
   const rawTime = formatTime(elapsedMs);
   const totalMs = elapsedMs + (penaltySeconds * 1000);
   const finalTime = formatTime(totalMs);
@@ -69,7 +69,7 @@ export function ResultView() {
         date,
         gameType: 'dead-letters',
         incorrectSubmissions,
-        hintUsed,
+        hintUsed: hintsUsed > 0,
       });
       localStorage.setItem(PLAYER_NAME_KEY, trimmed);
       setSubmitted(true);
@@ -138,7 +138,7 @@ export function ResultView() {
             {incorrectSubmissions > 1 && (
               <p>{incorrectSubmissions - 1} extra wrong guess{incorrectSubmissions > 2 ? 'es' : ''}: +{(incorrectSubmissions - 1) * 15}s</p>
             )}
-            {hintUsed && <p>Hint used: +30s</p>}
+            {hintsUsed > 0 && <p>{hintsUsed} hint{hintsUsed > 1 ? 's' : ''} used: +{hintsUsed * 30}s</p>}
           </div>
         )}
 

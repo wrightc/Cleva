@@ -34,6 +34,7 @@ export function GameView() {
     resetTiles,
     updateElapsedMs,
     completedGame,
+    secondHintAvailable,
   } = useDeadLettersState();
 
   const { formattedTime, elapsedMs } = useTimer({
@@ -246,10 +247,20 @@ export function GameView() {
             <button
               className="btn btn--secondary"
               onClick={useHint}
-              disabled={state.hintUsed}
-              title={state.hintUsed ? 'Hint already used' : 'Reveal one consonant (+30s penalty)'}
+              disabled={state.hintsUsed >= 2 || (state.hintsUsed === 1 && !secondHintAvailable)}
+              title={
+                state.hintsUsed >= 2
+                  ? 'Both hints used'
+                  : state.hintsUsed === 1 && !secondHintAvailable
+                    ? 'Second hint available after 1 minute'
+                    : 'Reveal one consonant (+30s penalty)'
+              }
             >
-              {state.hintUsed ? 'Hint Used' : 'Reveal a Consonant'}
+              {state.hintsUsed >= 2
+                ? 'Both Hints Used'
+                : state.hintsUsed === 1 && !secondHintAvailable
+                  ? 'Second Hint at 1:00'
+                  : `Reveal a Consonant (${state.hintsUsed}/2)`}
             </button>
 
             <button
@@ -259,6 +270,13 @@ export function GameView() {
               Reset Tiles
             </button>
           </div>
+
+          {/* Second hint notification */}
+          {secondHintAvailable && state.hintsUsed === 1 && (
+            <p className="dl-hint-available" role="status">
+              A second hint is now available! (+30s penalty)
+            </p>
+          )}
         </div>
       </div>
 

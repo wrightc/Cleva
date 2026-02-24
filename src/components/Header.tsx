@@ -25,7 +25,6 @@ export function Header({ trippy, onToggleTrippy }: HeaderProps) {
         </NavLink>
         {game && (
           <>
-            <span className="header-game-badge">{game.name}</span>
             <nav className="header-nav">
               <NavLink
                 to={game.prefix}

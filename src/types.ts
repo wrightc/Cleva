@@ -97,7 +97,7 @@ export interface DLGameState {
   slotTiles: (DLTile | null)[];       // answer slots (same length as consonants)
   status: DLGameStatus;
   incorrectSubmissions: number;
-  hintUsed: boolean;
+  hintsUsed: number;                  // 0, 1, or 2 hints used
   elapsedMs: number;
   penaltySeconds: number;             // total penalty seconds accumulated
   errorMessage: string | null;
@@ -111,7 +111,7 @@ export interface DLCompletedGame {
   elapsedMs: number;         // raw solve time
   penaltySeconds: number;    // total penalties
   incorrectSubmissions: number;
-  hintUsed: boolean;
+  hintsUsed: number;         // 0, 1, or 2
   submitted: boolean;
   playerName?: string;
 }

@@ -3,6 +3,7 @@ import { fetchDLPuzzle } from '../utils/api';
 import type { DLGameState, DLTile, DLCompletedGame } from '../types';
 
 const DL_COMPLETED_KEY_PREFIX = 'dl_completed_';
+const SECOND_HINT_THRESHOLD_MS = 60_000; // 60 seconds
 
 function getCompletedGame(date: string): DLCompletedGame | null {
   try {
@@ -39,6 +40,7 @@ interface UseDeadLettersStateReturn {
   resetTiles: () => void;
   updateElapsedMs: (ms: number) => void;
   completedGame: DLCompletedGame | null;
+  secondHintAvailable: boolean;
 }
 
 export function useDeadLettersState(): UseDeadLettersStateReturn {
@@ -50,7 +52,7 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
     slotTiles: [],
     status: 'loading',
     incorrectSubmissions: 0,
-    hintUsed: false,
+    hintsUsed: 0,
     elapsedMs: 0,
     penaltySeconds: 0,
     errorMessage: null,
@@ -60,6 +62,12 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
   const [completedGame, setCompletedGame] = useState<DLCompletedGame | null>(
     getCompletedGame(today)
   );
+
+  // Second hint is available after 60 seconds and only 1 hint used so far
+  const secondHintAvailable =
+    state.status === 'playing' &&
+    state.hintsUsed === 1 &&
+    state.elapsedMs >= SECOND_HINT_THRESHOLD_MS;
 
   // Load puzzle on mount
   useEffect(() => {
@@ -207,8 +215,6 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
 
     // Check against the correct consonant order from the puzzle
     if (playerConsonants === s.puzzle.correctConsonants) {
-      // Correct — reconstruct the word by noting the position
-      // We don't have the full word on the client, but we'll store what we have
       const completed: DLCompletedGame = {
         date: s.puzzle.date,
         word: s.puzzle.word,
@@ -216,7 +222,7 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
         elapsedMs: s.elapsedMs,
         penaltySeconds: s.penaltySeconds,
         incorrectSubmissions: s.incorrectSubmissions,
-        hintUsed: s.hintUsed,
+        hintsUsed: s.hintsUsed,
         submitted: false,
       };
       saveCompletedGame(completed);
@@ -243,7 +249,11 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
 
   const useHint = useCallback(() => {
     setState((s) => {
-      if (s.status !== 'playing' || s.hintUsed || !s.puzzle) return s;
+      if (s.status !== 'playing' || !s.puzzle) return s;
+
+      // Max 2 hints; second hint requires 60s elapsed
+      if (s.hintsUsed >= 2) return s;
+      if (s.hintsUsed === 1 && s.elapsedMs < SECOND_HINT_THRESHOLD_MS) return s;
 
       const correctOrder = s.puzzle.correctConsonants;
 
@@ -303,7 +313,7 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
         ...s,
         trayTiles: newTray,
         slotTiles: newSlots,
-        hintUsed: true,
+        hintsUsed: s.hintsUsed + 1,
         penaltySeconds: s.penaltySeconds + 30,
         errorMessage: null,
       };
@@ -346,5 +356,6 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
     resetTiles,
     updateElapsedMs,
     completedGame,
+    secondHintAvailable,
   };
 }

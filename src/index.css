@@ -1027,6 +1027,26 @@ body {
   padding: 8px 20px;
 }
 
+/* ── Dead Letters — Hint Available ─────────────────────────── */
+
+.dl-hint-available {
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #047857;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  width: 100%;
+  animation: dl-hint-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dl-hint-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 /* ── Dead Letters — Error & Penalty ────────────────────────── */
 
 .dl-error-message {
@@ -1528,6 +1548,12 @@ body {
   background: rgba(244,114,182,0.10);
   border-color: rgba(244,114,182,0.30);
   color: #f9a8d4;
+}
+
+[data-trippy="true"] .dl-hint-available {
+  background: rgba(52,211,153,0.10);
+  border-color: rgba(52,211,153,0.30);
+  color: #6ee7b7;
 }
 
 [data-trippy="true"] .dl-penalty-badge {

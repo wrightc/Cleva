@@ -43,7 +43,7 @@ export function HowToPlayView() {
             <li>You'll be told how many <strong>vowels the word has</strong> as a clue.</li>
             <li>Submit your answer when all slots are filled.</li>
             <li>You have <strong>unlimited guesses</strong>, but each wrong guess after the first adds a <strong>15-second penalty</strong>.</li>
-            <li>You can use one <strong>hint</strong> to reveal a consonant in its correct position, with a <strong>30-second penalty</strong>.</li>
+            <li>You can use up to <strong>two hints</strong>, each revealing a consonant in its correct position with a <strong>30-second penalty</strong>. The first hint is available immediately; the second unlocks after <strong>1 minute</strong>.</li>
             <li>A new puzzle is available every day at <strong>midnight Eastern time</strong>.</li>
           </ul>
         </section>
@@ -56,7 +56,7 @@ export function HowToPlayView() {
           <ul className="how-to-rules">
             <li>First wrong guess: no penalty</li>
             <li>Each additional wrong guess: <strong>+15 seconds</strong></li>
-            <li>Using a hint: <strong>+30 seconds</strong></li>
+            <li>Using a hint (up to 2): <strong>+30 seconds each</strong></li>
           </ul>
         </section>
 
