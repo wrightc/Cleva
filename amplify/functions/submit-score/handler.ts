@@ -51,7 +51,7 @@ export const handler = async (event: FunctionUrlEvent) => {
     return jsonResponse(400, { error: 'Invalid JSON body' });
   }
 
-  const { playerName, solveTimeMs, stepCount, date, gameType, incorrectSubmissions, hintUsed } = body;
+  const { playerName, solveTimeMs, stepCount, date, gameType, incorrectSubmissions, hintUsed, hintsUsed } = body;
 
   // Validate game type
   const game = (typeof gameType === 'string' && VALID_GAME_TYPES.includes(gameType as GameType))
@@ -135,13 +135,14 @@ export const handler = async (event: FunctionUrlEvent) => {
   if (game === 'dead-letters') {
     row.incorrect_submissions = typeof incorrectSubmissions === 'number' ? incorrectSubmissions : 0;
     row.hint_used = typeof hintUsed === 'boolean' ? hintUsed : false;
+    row.hints_used = typeof hintsUsed === 'number' ? hintsUsed : 0;
   }
 
   // Insert the leaderboard entry
   const { data: entry, error } = await supabase
     .from('leaderboard')
     .insert(row)
-    .select('id, date, player_name, solve_time_ms, step_count, submitted_at, game_type, incorrect_submissions, hint_used')
+    .select('id, date, player_name, solve_time_ms, step_count, submitted_at, game_type, incorrect_submissions, hint_used, hints_used')
     .single();
 
   if (error) {

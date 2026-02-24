@@ -89,7 +89,7 @@ export function LeaderboardView() {
                 <th scope="col">#</th>
                 <th scope="col">Name</th>
                 <th scope="col">Time</th>
-                <th scope="col" title="Hint used">💡</th>
+                <th scope="col" title="Hints used">Hints</th>
               </tr>
             </thead>
             <tbody>
@@ -105,7 +105,7 @@ export function LeaderboardView() {
                   <td>{entry.rank}</td>
                   <td>{entry.player_name}</td>
                   <td>{formatTime(entry.solve_time_ms)}</td>
-                  <td>{entry.hint_used ? '💡' : ''}</td>
+                  <td>{entry.hints_used ?? (entry.hint_used ? 1 : 0)}</td>
                 </tr>
               ))}
             </tbody>

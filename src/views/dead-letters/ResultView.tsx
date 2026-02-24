@@ -70,6 +70,7 @@ export function ResultView() {
         gameType: 'dead-letters',
         incorrectSubmissions,
         hintUsed: hintsUsed > 0,
+        hintsUsed,
       });
       localStorage.setItem(PLAYER_NAME_KEY, trimmed);
       setSubmitted(true);
@@ -196,7 +197,7 @@ export function ResultView() {
                   <th>#</th>
                   <th>Name</th>
                   <th>Time</th>
-                  <th title="Hint used">💡</th>
+                  <th title="Hints used">Hints</th>
                 </tr>
               </thead>
               <tbody>
@@ -212,7 +213,7 @@ export function ResultView() {
                     <td>{entry.rank}</td>
                     <td>{entry.player_name}</td>
                     <td>{formatTime(entry.solve_time_ms)}</td>
-                    <td>{entry.hint_used ? '💡' : ''}</td>
+                    <td>{entry.hints_used ?? (entry.hint_used ? 1 : 0)}</td>
                   </tr>
                 ))}
               </tbody>

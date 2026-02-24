@@ -18,6 +18,7 @@ export interface LeaderboardEntry {
   game_type?: GameType;
   incorrect_submissions?: number;
   hint_used?: boolean;
+  hints_used?: number;
 }
 
 export interface LeaderboardResponse {
@@ -36,6 +37,7 @@ export interface SubmitScorePayload {
   gameType?: GameType;
   incorrectSubmissions?: number;
   hintUsed?: boolean;
+  hintsUsed?: number;
 }
 
 export type GameStatus =

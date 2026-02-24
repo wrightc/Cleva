@@ -44,7 +44,7 @@ export const handler = async (event: FunctionUrlEvent) => {
     // Build query with game-specific ordering
     let query = supabase
       .from('leaderboard')
-      .select('id, date, player_name, solve_time_ms, step_count, submitted_at, game_type, incorrect_submissions, hint_used')
+      .select('id, date, player_name, solve_time_ms, step_count, submitted_at, game_type, incorrect_submissions, hint_used, hints_used')
       .eq('date', date)
       .eq('game_type', gameType)
       .order('solve_time_ms', { ascending: true });
