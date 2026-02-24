@@ -40,6 +40,7 @@ export function GameView() {
     date: state.puzzle?.date ?? null,
     running: state.status === 'playing',
     initialElapsedMs: state.elapsedMs,
+    keyPrefix: 'dl_timer_',
   });
 
   useEffect(() => {

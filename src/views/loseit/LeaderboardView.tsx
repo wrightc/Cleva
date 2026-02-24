@@ -6,12 +6,12 @@ import type { LeaderboardEntry } from '../../types';
 const PLAYER_NAME_KEY = 'sw_player_name';
 const REFRESH_INTERVAL_MS = 60_000;
 
-function getTodayUtc(): string {
-  return new Date().toISOString().split('T')[0];
+function getTodayEastern(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 }
 
 export function LeaderboardView() {
-  const today = getTodayUtc();
+  const today = getTodayEastern();
 
   const [date, setDate] = useState<string>(today);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);

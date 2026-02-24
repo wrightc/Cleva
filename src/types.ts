@@ -71,6 +71,7 @@ export interface CompletedGame {
 
 export interface DLPuzzle {
   date: string;              // YYYY-MM-DD
+  word: string;              // the full word (revealed after completion)
   consonants: string;        // scrambled consonants (uppercase)
   vowelCount: number;
   answerHash: string;        // SHA-256 of correct consonant order

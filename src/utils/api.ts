@@ -15,14 +15,24 @@ const URLS = {
 };
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, options);
-  const json = await res.json();
-
-  if (!res.ok) {
-    throw new Error(json?.error || `HTTP ${res.status}`);
+  if (!url) {
+    throw new Error('API endpoint URL is not configured. Check your environment variables.');
   }
 
-  return json as T;
+  const res = await fetch(url, options);
+
+  if (!res.ok) {
+    let message = `HTTP ${res.status}`;
+    try {
+      const json = await res.json();
+      if (json?.error) message = json.error;
+    } catch {
+      // Response wasn't JSON (e.g. HTML error page)
+    }
+    throw new Error(message);
+  }
+
+  return (await res.json()) as T;
 }
 
 // ─── LoseIt API ──────────────────────────────────────────────────────────────

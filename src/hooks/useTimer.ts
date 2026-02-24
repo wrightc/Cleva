@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-const SESSION_KEY_PREFIX = 'sw_timer_';
 
 interface TimerState {
   elapsedAtPause: number; // ms elapsed before current session
@@ -19,6 +18,7 @@ interface UseTimerOptions {
   date: string | null;
   running: boolean;
   initialElapsedMs?: number;
+  keyPrefix?: string;
 }
 
 interface UseTimerReturn {
@@ -27,7 +27,7 @@ interface UseTimerReturn {
   resetTimer: () => void;
 }
 
-export function useTimer({ date, running, initialElapsedMs = 0 }: UseTimerOptions): UseTimerReturn {
+export function useTimer({ date, running, initialElapsedMs = 0, keyPrefix = 'sw_timer_' }: UseTimerOptions): UseTimerReturn {
   const [elapsedMs, setElapsedMs] = useState<number>(initialElapsedMs);
   const frameRef = useRef<number | null>(null);
   const timerStateRef = useRef<TimerState>({
@@ -39,7 +39,7 @@ export function useTimer({ date, running, initialElapsedMs = 0 }: UseTimerOption
   useEffect(() => {
     if (!date) return;
 
-    const key = `${SESSION_KEY_PREFIX}${date}`;
+    const key = `${keyPrefix}${date}`;
     const stored = sessionStorage.getItem(key);
     if (stored) {
       try {
@@ -60,7 +60,7 @@ export function useTimer({ date, running, initialElapsedMs = 0 }: UseTimerOption
   useEffect(() => {
     if (!date || !running) return;
 
-    const key = `${SESSION_KEY_PREFIX}${date}`;
+    const key = `${keyPrefix}${date}`;
     sessionStorage.setItem(
       key,
       JSON.stringify({
@@ -100,7 +100,7 @@ export function useTimer({ date, running, initialElapsedMs = 0 }: UseTimerOption
     timerStateRef.current = { elapsedAtPause: 0, startEpoch: Date.now() };
     setElapsedMs(0);
     if (date) {
-      sessionStorage.removeItem(`${SESSION_KEY_PREFIX}${date}`);
+      sessionStorage.removeItem(`${keyPrefix}${date}`);
     }
   };
 

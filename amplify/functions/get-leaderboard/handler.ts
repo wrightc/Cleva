@@ -21,7 +21,7 @@ export const handler = async (event: FunctionUrlEvent) => {
   const dateParam = params.date;
   const date = dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)
     ? dateParam
-    : new Date().toISOString().split('T')[0];
+    : new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
   const limit = Math.min(parseInt(params.limit || '25', 10) || 25, 100);
   const offset = Math.max(parseInt(params.offset || '0', 10) || 0, 0);

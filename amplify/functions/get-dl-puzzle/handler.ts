@@ -53,7 +53,7 @@ export const handler = async (event: FunctionUrlEvent) => {
 
     const { data, error } = await supabase
       .from('dl_puzzles')
-      .select('date, consonants, vowel_count')
+      .select('date, word, consonants, vowel_count')
       .eq('date', date)
       .single();
 
@@ -69,6 +69,7 @@ export const handler = async (event: FunctionUrlEvent) => {
 
     return jsonResponse(200, {
       date: data.date,
+      word: data.word,
       consonants: scrambled,
       vowelCount: data.vowel_count,
       answerHash,

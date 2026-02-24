@@ -211,7 +211,7 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
       // We don't have the full word on the client, but we'll store what we have
       const completed: DLCompletedGame = {
         date: s.puzzle.date,
-        word: '', // will be set by result view from API or stored data
+        word: s.puzzle.word,
         consonants: s.puzzle.consonants,
         elapsedMs: s.elapsedMs,
         penaltySeconds: s.penaltySeconds,
