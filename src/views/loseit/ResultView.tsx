@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { submitScore, fetchLeaderboard } from '../utils/api';
-import { formatTime } from '../hooks/useTimer';
-import type { CompletedGame, LeaderboardEntry } from '../types';
+import { submitScore, fetchLeaderboard } from '../../utils/api';
+import { formatTime } from '../../hooks/useTimer';
+import type { CompletedGame, LeaderboardEntry } from '../../types';
 
 const PLAYER_NAME_KEY = 'sw_player_name';
 const MINIMUM_STEPS = 6;
@@ -23,12 +23,12 @@ export function ResultView() {
 
   useEffect(() => {
     if (!completedGame) {
-      navigate('/', { replace: true });
+      navigate('/loseit', { replace: true });
       return;
     }
 
     // Load top 5 leaderboard entries
-    fetchLeaderboard(completedGame.date, 5, 0)
+    fetchLeaderboard(completedGame.date, 5, 0, 'loseit')
       .then((res) => setTopEntries(res.entries))
       .catch(console.error);
   }, [completedGame, navigate]);
@@ -57,12 +57,12 @@ export function ResultView() {
     setIsSubmitting(true);
 
     try {
-      await submitScore({ playerName: trimmed, solveTimeMs: elapsedMs, stepCount, date });
+      await submitScore({ playerName: trimmed, solveTimeMs: elapsedMs, stepCount, date, gameType: 'loseit' });
       localStorage.setItem(PLAYER_NAME_KEY, trimmed);
       setSubmitted(true);
 
       // Refresh leaderboard after submission
-      const updated = await fetchLeaderboard(date, 5, 0);
+      const updated = await fetchLeaderboard(date, 5, 0, 'loseit');
       setTopEntries(updated.entries);
     } catch (err) {
       setNameError(err instanceof Error ? err.message : 'Failed to submit score');
@@ -76,7 +76,7 @@ export function ResultView() {
     const formatted = new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString(
       'en-US', { month: 'long', day: 'numeric' }
     );
-    const text = `LoseIt — ${formatted} | Solved in ${formattedTime} | ${window.location.origin}`;
+    const text = `LoseIt — ${formatted} | Solved in ${formattedTime} | ${window.location.origin}/loseit`;
     navigator.clipboard.writeText(text).then(() => {
       setShareMessage('Copied to clipboard!');
       setTimeout(() => setShareMessage(''), 2000);

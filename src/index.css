@@ -772,6 +772,339 @@ body {
   line-height: 1.6;
 }
 
+/* ── Header Game Badge ──────────────────────────────────────── */
+
+.header-game-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a5b4fc;
+  background: rgba(99,102,241,0.18);
+  padding: 3px 10px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+/* ── Home Page ──────────────────────────────────────────────── */
+
+.view--home {
+  max-width: 680px;
+  padding-top: 20px;
+}
+
+.home-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.home-subtitle {
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.home-games {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+.game-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 24px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.game-card__title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.game-card__description {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.game-card__cta {
+  align-self: flex-start;
+  font-size: 0.9rem;
+  padding: 10px 24px;
+}
+
+/* ── Dead Letters — Tiles ──────────────────────────────────── */
+
+.dl-game {
+  gap: 16px;
+}
+
+.dl-vowel-hint {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-align: center;
+  background: var(--color-primary-faint);
+  padding: 6px 16px;
+  border-radius: 99px;
+}
+
+.dl-tray {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 64px;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.03);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  align-items: center;
+}
+
+.dl-tray__empty {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.dl-tile {
+  width: 52px;
+  height: 52px;
+  border: 2px solid var(--color-tile-border);
+  border-radius: var(--radius-md);
+  background: var(--color-tile-bg);
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.12s, background 0.12s, transform 0.12s, box-shadow 0.12s;
+  box-shadow: var(--color-tile-shadow);
+  color: var(--color-text);
+  user-select: none;
+  touch-action: none;
+  font-family: var(--font-sans);
+}
+
+.dl-tile:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99,102,241,0.20);
+}
+
+.dl-tile--selected {
+  border-color: var(--color-selected-bg);
+  background: var(--color-selected-bg);
+  color: var(--color-selected-fg);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99,102,241,0.35);
+}
+
+.dl-tile--dragging {
+  opacity: 0.9;
+  transform: scale(1.1);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+  cursor: grabbing;
+  z-index: 10;
+}
+
+.dl-tile--locked {
+  border-color: var(--color-success);
+  background: rgba(5,150,105,0.08);
+  color: var(--color-success);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* ── Dead Letters — Answer Slots ───────────────────────────── */
+
+.dl-slots {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.dl-slot {
+  width: 52px;
+  height: 52px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: rgba(0,0,0,0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+}
+
+.dl-slot--over {
+  border-color: var(--color-primary);
+  background: var(--color-primary-faint);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+.dl-slot--filled {
+  border-style: solid;
+  border-color: var(--color-tile-border);
+  background: var(--color-tile-bg);
+  box-shadow: var(--color-tile-shadow);
+}
+
+.dl-slot--locked {
+  border-color: var(--color-success);
+  background: rgba(5,150,105,0.08);
+}
+
+.dl-slot--selected {
+  border-color: var(--color-selected-bg);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.20);
+}
+
+.dl-slot__letter {
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.dl-slot__letter--locked {
+  color: var(--color-success);
+}
+
+.dl-slot__placeholder {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+/* ── Dead Letters — Actions ────────────────────────────────── */
+
+.dl-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.dl-actions__secondary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dl-actions__secondary .btn {
+  font-size: 0.85rem;
+  padding: 8px 20px;
+}
+
+/* ── Dead Letters — Error & Penalty ────────────────────────── */
+
+.dl-error-message {
+  background: #fff1f2;
+  border: 1.5px solid #fecdd3;
+  color: #be123c;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  width: 100%;
+}
+
+.dl-penalty-note {
+  font-weight: 500;
+  opacity: 0.8;
+  font-size: 0.8rem;
+}
+
+.dl-penalty-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #be123c;
+  background: #fff1f2;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1.5px solid #fecdd3;
+}
+
+/* ── Dead Letters — Result ─────────────────────────────────── */
+
+.dl-result-word {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.dl-result-letter {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-text);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(0,0,0,0.04);
+}
+
+.dl-result-letter--vowel {
+  color: var(--color-primary);
+  background: var(--color-primary-faint);
+}
+
+.dl-penalty-breakdown {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* ── Dead Letters — How to Play Example ────────────────────── */
+
+.dl-example {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--color-primary-faint);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.dl-vowel-highlight {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
 /* ── Trippy Toggle Button ────────────────────────────────────── */
 
 .trippy-toggle {
@@ -1085,6 +1418,144 @@ body {
   background-clip: text;
 }
 
+/* ── Trippy — Home Page ──────────────────────────────────────── */
+
+[data-trippy="true"] .home-title {
+  background: linear-gradient(90deg, #f0abfc, #818cf8, #67e8f9, #86efac);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-trippy="true"] .game-card {
+  background: rgba(14,14,38,0.88);
+  border-color: rgba(192,132,252,0.20);
+  backdrop-filter: blur(8px);
+}
+
+[data-trippy="true"] .game-card:hover {
+  border-color: rgba(192,132,252,0.55);
+  box-shadow: 0 8px 32px rgba(192,132,252,0.25);
+}
+
+[data-trippy="true"] .game-card__title {
+  background: linear-gradient(90deg, #c084fc, #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Trippy — Header Badge ──────────────────────────────────── */
+
+[data-trippy="true"] .header-game-badge {
+  color: #e0c4ff;
+  background: rgba(192,132,252,0.20);
+}
+
+/* ── Trippy — Dead Letters ──────────────────────────────────── */
+
+[data-trippy="true"] .dl-vowel-hint {
+  background: rgba(192,132,252,0.12);
+  color: #d8b4fe;
+}
+
+[data-trippy="true"] .dl-tray {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(160,140,255,0.18);
+}
+
+[data-trippy="true"] .dl-tile {
+  background: var(--color-tile-bg);
+  border-color: #f472b6;
+  color: #ffffff;
+  animation: rainbow-tile 5s linear infinite;
+}
+
+[data-trippy="true"] .dl-tile:nth-child(1) { animation-delay: 0s; }
+[data-trippy="true"] .dl-tile:nth-child(2) { animation-delay: -0.625s; }
+[data-trippy="true"] .dl-tile:nth-child(3) { animation-delay: -1.25s; }
+[data-trippy="true"] .dl-tile:nth-child(4) { animation-delay: -1.875s; }
+[data-trippy="true"] .dl-tile:nth-child(5) { animation-delay: -2.5s; }
+[data-trippy="true"] .dl-tile:nth-child(6) { animation-delay: -3.125s; }
+[data-trippy="true"] .dl-tile:nth-child(7) { animation-delay: -3.75s; }
+[data-trippy="true"] .dl-tile:nth-child(8) { animation-delay: -4.375s; }
+
+[data-trippy="true"] .dl-tile:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 0 24px currentColor, 0 8px 20px rgba(0,0,0,0.5);
+}
+
+[data-trippy="true"] .dl-tile--selected {
+  background: rgba(255,255,255,0.10);
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 0 0 30px currentColor;
+  animation: rainbow-tile 1.5s linear infinite;
+}
+
+[data-trippy="true"] .dl-tile--locked {
+  border-color: #34d399;
+  color: #34d399;
+  animation: none;
+  box-shadow: 0 0 12px rgba(52,211,153,0.4);
+}
+
+[data-trippy="true"] .dl-slot {
+  border-color: rgba(160,140,255,0.20);
+  background: rgba(255,255,255,0.02);
+}
+
+[data-trippy="true"] .dl-slot--over {
+  border-color: #c084fc;
+  background: rgba(192,132,252,0.12);
+  box-shadow: 0 0 0 3px rgba(192,132,252,0.15);
+}
+
+[data-trippy="true"] .dl-slot--filled {
+  border-color: rgba(244,114,182,0.5);
+  background: var(--color-tile-bg);
+}
+
+[data-trippy="true"] .dl-slot--locked {
+  border-color: rgba(52,211,153,0.5);
+  background: rgba(52,211,153,0.06);
+}
+
+[data-trippy="true"] .dl-slot__letter { color: #ffffff; }
+[data-trippy="true"] .dl-slot__letter--locked { color: #34d399; text-shadow: 0 0 8px rgba(52,211,153,0.5); }
+[data-trippy="true"] .dl-slot__placeholder { color: rgba(200,190,255,0.25); }
+
+[data-trippy="true"] .dl-error-message {
+  background: rgba(244,114,182,0.10);
+  border-color: rgba(244,114,182,0.30);
+  color: #f9a8d4;
+}
+
+[data-trippy="true"] .dl-penalty-badge {
+  background: rgba(244,114,182,0.12);
+  border-color: rgba(244,114,182,0.30);
+  color: #f9a8d4;
+}
+
+[data-trippy="true"] .dl-result-letter {
+  color: #ffffff;
+  background: rgba(255,255,255,0.05);
+}
+
+[data-trippy="true"] .dl-result-letter--vowel {
+  color: #c084fc;
+  background: rgba(192,132,252,0.15);
+  text-shadow: 0 0 8px rgba(192,132,252,0.5);
+}
+
+[data-trippy="true"] .dl-example {
+  background: rgba(192,132,252,0.08);
+}
+
+[data-trippy="true"] .dl-vowel-highlight {
+  color: #c084fc;
+  text-shadow: 0 0 6px rgba(192,132,252,0.5);
+}
+
 /* ── Responsive ─────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
@@ -1098,6 +1569,8 @@ body {
 
   .header-title { font-size: 1rem; }
 
+  .header-game-badge { font-size: 0.62rem; padding: 2px 8px; }
+
   .nav-link { padding: 6px 10px; font-size: 0.82rem; }
 
   .result-card { padding: 24px 20px; }
@@ -1107,4 +1580,20 @@ body {
   .name-form__row { flex-direction: column; }
 
   .btn--large { padding: 14px 32px; }
+
+  /* Home page responsive */
+  .home-title { font-size: 1.8rem; }
+  .home-games { grid-template-columns: 1fr; }
+  .game-card { padding: 20px 18px; }
+
+  /* Dead Letters responsive */
+  .dl-tile, .dl-slot {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+  }
+
+  .dl-slot__letter { font-size: 1.2rem; }
+
+  .dl-result-letter { font-size: 1.5rem; padding: 3px 6px; }
 }

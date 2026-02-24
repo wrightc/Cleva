@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { fetchLeaderboard } from '../utils/api';
-import { formatTime } from '../hooks/useTimer';
-import type { LeaderboardEntry } from '../types';
+import { fetchLeaderboard } from '../../utils/api';
+import { formatTime } from '../../hooks/useTimer';
+import type { LeaderboardEntry } from '../../types';
 
 const PLAYER_NAME_KEY = 'sw_player_name';
 const REFRESH_INTERVAL_MS = 60_000;
@@ -26,7 +26,7 @@ export function LeaderboardView() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetchLeaderboard(selectedDate, 25, 0);
+      const res = await fetchLeaderboard(selectedDate, 25, 0, 'loseit');
       setEntries(res.entries);
       setTotal(res.total);
     } catch (err) {

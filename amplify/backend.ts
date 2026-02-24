@@ -3,7 +3,7 @@
  *
  * Defines all Lambda functions and wires them up with:
  *   - Lambda function URLs (HTTPS endpoints, no API Gateway needed for MVP)
- *   - AWS EventBridge Scheduler for the daily 00:00 UTC cron job
+ *   - AWS EventBridge Scheduler for the daily 00:00 ET cron job (both games)
  *   - Amplify outputs so the frontend knows the function URLs
  */
 
@@ -12,8 +12,9 @@ import { getPuzzle } from './functions/get-puzzle/resource.js';
 import { generatePuzzle } from './functions/generate-puzzle/resource.js';
 import { submitScore } from './functions/submit-score/resource.js';
 import { getLeaderboard } from './functions/get-leaderboard/resource.js';
+import { getDLPuzzle } from './functions/get-dl-puzzle/resource.js';
+import { generateDLPuzzle } from './functions/generate-dl-puzzle/resource.js';
 
-import { Stack } from 'aws-cdk-lib';
 import { FunctionUrlAuthType, HttpMethod } from 'aws-cdk-lib/aws-lambda';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -23,6 +24,8 @@ const backend = defineBackend({
   generatePuzzle,
   submitScore,
   getLeaderboard,
+  getDLPuzzle,
+  generateDLPuzzle,
 });
 
 // ─── Lambda Function URLs ──────────────────────────────────────────────────
@@ -33,44 +36,63 @@ const corsConfig = {
   allowedHeaders: ['*'],
 };
 
-// get-puzzle URL
+// LoseIt function URLs
 const getPuzzleLambda = backend.getPuzzle.resources.lambda;
 const getPuzzleUrl = getPuzzleLambda.addFunctionUrl({
   authType: FunctionUrlAuthType.NONE,
   cors: corsConfig,
 });
 
-// generate-puzzle URL (for admin manual trigger)
 const generatePuzzleLambda = backend.generatePuzzle.resources.lambda;
 const generatePuzzleUrl = generatePuzzleLambda.addFunctionUrl({
   authType: FunctionUrlAuthType.NONE,
   cors: corsConfig,
 });
 
-// submit-score URL
+// Shared function URLs (submit-score, get-leaderboard)
 const submitScoreLambda = backend.submitScore.resources.lambda;
 const submitScoreUrl = submitScoreLambda.addFunctionUrl({
   authType: FunctionUrlAuthType.NONE,
   cors: corsConfig,
 });
 
-// get-leaderboard URL
 const getLeaderboardLambda = backend.getLeaderboard.resources.lambda;
 const getLeaderboardUrl = getLeaderboardLambda.addFunctionUrl({
   authType: FunctionUrlAuthType.NONE,
   cors: corsConfig,
 });
 
-// ─── EventBridge Rule (daily cron at 00:00 UTC) ───────────────────────────
+// Dead Letters function URLs
+const getDLPuzzleLambda = backend.getDLPuzzle.resources.lambda;
+const getDLPuzzleUrl = getDLPuzzleLambda.addFunctionUrl({
+  authType: FunctionUrlAuthType.NONE,
+  cors: corsConfig,
+});
+
+const generateDLPuzzleLambda = backend.generateDLPuzzle.resources.lambda;
+const generateDLPuzzleUrl = generateDLPuzzleLambda.addFunctionUrl({
+  authType: FunctionUrlAuthType.NONE,
+  cors: corsConfig,
+});
+
+// ─── EventBridge Rules (daily cron at 05:00 UTC = midnight ET) ───────────
 
 const cronStack = backend.createStack('CronStack');
 
-// EventBridge Rule using aws-events (simpler, stable API)
+// LoseIt daily puzzle generation
 new Rule(cronStack, 'DailyPuzzleRule', {
-  ruleName: 'shrinking-word-daily-puzzle',
+  ruleName: 'loseit-daily-puzzle',
   description: "Generates today's LoseIt puzzle at midnight Eastern time (05:00 UTC)",
   schedule: Schedule.cron({ minute: '0', hour: '5' }),
   targets: [new LambdaFunction(generatePuzzleLambda)],
+});
+
+// Dead Letters daily puzzle generation
+new Rule(cronStack, 'DailyDLPuzzleRule', {
+  ruleName: 'dead-letters-daily-puzzle',
+  description: "Generates today's Dead Letters puzzle at midnight Eastern time (05:00 UTC)",
+  schedule: Schedule.cron({ minute: '0', hour: '5' }),
+  targets: [new LambdaFunction(generateDLPuzzleLambda)],
 });
 
 // ─── Amplify Outputs (makes URLs available during deployment) ─────────────
@@ -81,5 +103,7 @@ backend.addOutput({
     generatePuzzleUrl: generatePuzzleUrl.url,
     submitScoreUrl: submitScoreUrl.url,
     getLeaderboardUrl: getLeaderboardUrl.url,
+    getDLPuzzleUrl: getDLPuzzleUrl.url,
+    generateDLPuzzleUrl: generateDLPuzzleUrl.url,
   },
 });

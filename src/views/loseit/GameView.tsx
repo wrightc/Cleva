@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGameState } from '../hooks/useGameState';
-import { useTimer } from '../hooks/useTimer';
-import { useDefinition } from '../hooks/useDefinition';
-import { LetterTile } from '../components/LetterTile';
-import { WordChain } from '../components/WordChain';
-import { Timer } from '../components/Timer';
+import { useGameState } from '../../hooks/useGameState';
+import { useTimer } from '../../hooks/useTimer';
+import { useDefinition } from '../../hooks/useDefinition';
+import { LetterTile } from '../../components/LetterTile';
+import { WordChain } from '../../components/WordChain';
+import { Timer } from '../../components/Timer';
 
 export function GameView() {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export function GameView() {
   // Redirect to result if already played
   useEffect(() => {
     if (state.status === 'already-played' || state.status === 'complete') {
-      navigate('/result', {
+      navigate('/loseit/result', {
         replace: true,
         state: { completedGame, elapsedMs },
       });

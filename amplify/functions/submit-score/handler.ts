@@ -1,15 +1,15 @@
 /**
  * POST /submit-score
  *
- * Body: { playerName: string, solveTimeMs: number, stepCount: number, date: string }
+ * Body: { playerName, solveTimeMs, stepCount, date, gameType?, incorrectSubmissions?, hintUsed? }
  *
- * Validates input, hashes the player's IP, enforces one-submission-per-IP-per-day,
+ * Validates input, hashes the player's IP, enforces one-submission-per-IP-per-day-per-game,
  * and inserts the leaderboard entry.
  */
 
 import { createHash } from 'crypto';
 import { getSupabaseClient, jsonResponse } from '../shared/supabase.js';
-import type { FunctionUrlEvent } from '../shared/types.js';
+import type { FunctionUrlEvent, GameType } from '../shared/types.js';
 
 // Basic profanity blocklist (extend as needed)
 const PROFANITY_BLOCKLIST = ['fuck', 'shit', 'ass', 'bitch', 'cunt', 'dick', 'piss'];
@@ -32,6 +32,8 @@ function getClientIp(event: FunctionUrlEvent): string {
   );
 }
 
+const VALID_GAME_TYPES: GameType[] = ['loseit', 'dead-letters'];
+
 export const handler = async (event: FunctionUrlEvent) => {
   if (event.requestContext?.http?.method === 'OPTIONS') {
     return jsonResponse(200, {});
@@ -42,14 +44,19 @@ export const handler = async (event: FunctionUrlEvent) => {
   }
 
   // Parse body
-  let body: { playerName?: unknown; solveTimeMs?: unknown; stepCount?: unknown; date?: unknown };
+  let body: Record<string, unknown>;
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
     return jsonResponse(400, { error: 'Invalid JSON body' });
   }
 
-  const { playerName, solveTimeMs, stepCount, date } = body;
+  const { playerName, solveTimeMs, stepCount, date, gameType, incorrectSubmissions, hintUsed } = body;
+
+  // Validate game type
+  const game = (typeof gameType === 'string' && VALID_GAME_TYPES.includes(gameType as GameType))
+    ? gameType as GameType
+    : 'loseit';
 
   // Validate player name
   if (typeof playerName !== 'string') {
@@ -71,9 +78,14 @@ export const handler = async (event: FunctionUrlEvent) => {
     return jsonResponse(400, { error: 'solveTimeMs must be a positive integer' });
   }
 
-  // Validate stepCount (minimum 6 for a 7-letter word reduced to 1 letter)
-  if (typeof stepCount !== 'number' || stepCount < 6 || !Number.isInteger(stepCount)) {
-    return jsonResponse(400, { error: 'stepCount must be an integer >= 6' });
+  // Validate stepCount
+  if (typeof stepCount !== 'number' || stepCount < 1 || !Number.isInteger(stepCount)) {
+    return jsonResponse(400, { error: 'stepCount must be a positive integer' });
+  }
+
+  // Game-specific validation
+  if (game === 'loseit' && stepCount < 6) {
+    return jsonResponse(400, { error: 'stepCount must be >= 6 for LoseIt' });
   }
 
   // Validate date
@@ -83,9 +95,10 @@ export const handler = async (event: FunctionUrlEvent) => {
 
   const supabase = getSupabaseClient();
 
-  // Verify the puzzle exists for this date
+  // Verify the puzzle exists for this date (check correct table based on game)
+  const puzzleTable = game === 'dead-letters' ? 'dl_puzzles' : 'puzzles';
   const { data: puzzle } = await supabase
-    .from('puzzles')
+    .from(puzzleTable)
     .select('date')
     .eq('date', date)
     .single();
@@ -97,30 +110,41 @@ export const handler = async (event: FunctionUrlEvent) => {
   const ip = getClientIp(event);
   const ipHash = hashIp(ip);
 
-  // Soft duplicate check: one submission per IP per day
+  // Soft duplicate check: one submission per IP per day per game
   const { data: existing } = await supabase
     .from('leaderboard')
     .select('id')
     .eq('ip_hash', ipHash)
     .eq('date', date)
+    .eq('game_type', game)
     .single();
 
   if (existing) {
     return jsonResponse(409, { error: 'You have already submitted a score for today' });
   }
 
+  // Build insert row
+  const row: Record<string, unknown> = {
+    date,
+    player_name: trimmedName,
+    solve_time_ms: solveTimeMs,
+    step_count: stepCount,
+    submitted_at: new Date().toISOString(),
+    ip_hash: ipHash,
+    game_type: game,
+  };
+
+  // Dead Letters-specific fields
+  if (game === 'dead-letters') {
+    row.incorrect_submissions = typeof incorrectSubmissions === 'number' ? incorrectSubmissions : 0;
+    row.hint_used = typeof hintUsed === 'boolean' ? hintUsed : false;
+  }
+
   // Insert the leaderboard entry
   const { data: entry, error } = await supabase
     .from('leaderboard')
-    .insert({
-      date,
-      player_name: trimmedName,
-      solve_time_ms: solveTimeMs,
-      step_count: stepCount,
-      submitted_at: new Date().toISOString(),
-      ip_hash: ipHash,
-    })
-    .select('id, date, player_name, solve_time_ms, step_count, submitted_at')
+    .insert(row)
+    .select('id, date, player_name, solve_time_ms, step_count, submitted_at, game_type, incorrect_submissions, hint_used')
     .single();
 
   if (error) {

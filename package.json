@@ -10,10 +10,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-wordlist": "node scripts/generate-wordlist.mjs",
-    "seed": "npx tsx scripts/seed.ts"
+    "seed": "dotenv -e .env -- npx tsx scripts/seed.ts",
+    "seed-dl": "dotenv -e .env -- npx tsx scripts/seed-dl.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.77.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@supabase/supabase-js": "^2.97.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -30,6 +34,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "aws-cdk-lib": "^2.238.0",
     "constructs": "^10.5.0",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",

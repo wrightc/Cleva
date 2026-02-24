@@ -1,6 +1,10 @@
+export type GameType = 'loseit' | 'dead-letters';
+
+// ─── LoseIt Types ────────────────────────────────────────────────────────────
+
 export interface Puzzle {
   date: string;   // YYYY-MM-DD
-  word: string;   // 7-letter uppercase starting word
+  word: string;   // 8-letter uppercase starting word
 }
 
 export interface LeaderboardEntry {
@@ -11,6 +15,9 @@ export interface LeaderboardEntry {
   step_count: number;
   submitted_at: string;
   rank: number;
+  game_type?: GameType;
+  incorrect_submissions?: number;
+  hint_used?: boolean;
 }
 
 export interface LeaderboardResponse {
@@ -26,6 +33,9 @@ export interface SubmitScorePayload {
   solveTimeMs: number;
   stepCount: number;
   date: string;
+  gameType?: GameType;
+  incorrectSubmissions?: number;
+  hintUsed?: boolean;
 }
 
 export type GameStatus =
@@ -53,6 +63,54 @@ export interface CompletedGame {
   date: string;
   chain: string[];
   elapsedMs: number;
+  submitted: boolean;
+  playerName?: string;
+}
+
+// ─── Dead Letters Types ──────────────────────────────────────────────────────
+
+export interface DLPuzzle {
+  date: string;              // YYYY-MM-DD
+  consonants: string;        // scrambled consonants (uppercase)
+  vowelCount: number;
+  answerHash: string;        // SHA-256 of correct consonant order
+  correctConsonants: string; // correct consonant order (for hints + validation)
+}
+
+export interface DLTile {
+  id: string;          // unique tile id (e.g., "tile-0")
+  letter: string;      // single consonant
+  isLocked: boolean;   // locked by hint — cannot be moved
+}
+
+export type DLGameStatus =
+  | 'loading'
+  | 'playing'
+  | 'complete'
+  | 'error'
+  | 'already-played';
+
+export interface DLGameState {
+  puzzle: DLPuzzle | null;
+  trayTiles: DLTile[];                // tiles not yet placed in slots
+  slotTiles: (DLTile | null)[];       // answer slots (same length as consonants)
+  status: DLGameStatus;
+  incorrectSubmissions: number;
+  hintUsed: boolean;
+  elapsedMs: number;
+  penaltySeconds: number;             // total penalty seconds accumulated
+  errorMessage: string | null;
+  fatalError: string | null;
+}
+
+export interface DLCompletedGame {
+  date: string;
+  word: string;              // the revealed word
+  consonants: string;        // the original consonant string
+  elapsedMs: number;         // raw solve time
+  penaltySeconds: number;    // total penalties
+  incorrectSubmissions: number;
+  hintUsed: boolean;
   submitted: boolean;
   playerName?: string;
 }

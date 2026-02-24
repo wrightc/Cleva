@@ -2,14 +2,34 @@
  * Shared TypeScript types for Lambda functions.
  */
 
+export type GameType = 'loseit' | 'dead-letters';
+
+// ─── LoseIt Puzzle ───────────────────────────────────────────────────────────
+
 export interface Puzzle {
   date: string;           // ISO 8601 date string e.g. "2025-03-15"
-  word: string;           // 7-letter uppercase starting word
+  word: string;           // 8-letter uppercase starting word
   generated_at: string;
   generation_attempts: number;
   used_fallback: boolean;
   example_solution_path: string[];
 }
+
+// ─── Dead Letters Puzzle ─────────────────────────────────────────────────────
+
+export interface DLPuzzle {
+  date: string;
+  word: string;
+  consonants: string;
+  vowel_count: number;
+  difficulty_score: number;
+  difficulty_rationale: string;
+  generated_at: string;
+  generation_attempts: number;
+  used_fallback: boolean;
+}
+
+// ─── Leaderboard ─────────────────────────────────────────────────────────────
 
 export interface LeaderboardEntry {
   id: string;
@@ -19,6 +39,9 @@ export interface LeaderboardEntry {
   step_count: number;
   submitted_at: string;
   ip_hash: string;
+  game_type: GameType;
+  incorrect_submissions?: number;
+  hint_used?: boolean;
 }
 
 export interface LeaderboardEntryWithRank extends Omit<LeaderboardEntry, 'ip_hash'> {
