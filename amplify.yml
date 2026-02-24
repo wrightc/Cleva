@@ -5,6 +5,7 @@ backend:
     build:
       commands:
         - npm ci --cache .npm --prefer-offline
+        - node scripts/generate-wordlist.mjs
         - npx ampx pipeline-deploy --branch main --app-id d3556uzmvz710h
 
 frontend:
