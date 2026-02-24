@@ -9,9 +9,10 @@ export function HowToPlayView() {
         <section className="how-to-section">
           <h2>The Goal</h2>
           <p>
-            Each day you're given a scrambled set of <strong>consonants</strong>. The vowels have
-            been removed from a hidden English word. Your goal is to arrange the consonants in the
-            correct order to reveal the word.
+            Each day, the vowels are stripped from a hidden English word, and the remaining
+            <strong> consonants are scrambled</strong>. Your job is to put the consonants back in
+            the order they appear in the original word. The answer slots represent <strong>only
+            the consonant positions</strong> — you don't need to guess where the vowels go.
           </p>
         </section>
 
@@ -22,11 +23,15 @@ export function HowToPlayView() {
               Hidden word: <strong>STR<span className="dl-vowel-highlight">E</span>NGTH</strong>
             </div>
             <div className="dl-example__consonants">
-              Consonants shown (scrambled): <strong>G — T — N — H — S — R — T</strong>
+              You see (scrambled): <strong>G — T — N — H — S — R — T</strong>
             </div>
             <div className="dl-example__answer">
-              Correct arrangement: <strong>S — T — R — N — G — T — H</strong>
+              Correct answer: <strong>S — T — R — N — G — T — H</strong>
             </div>
+            <p className="dl-example__note">
+              The vowel "E" has been removed — you only arrange the 7 consonants. The game tells
+              you the word has 1 vowel as a clue to help you think of what word it could be.
+            </p>
           </div>
         </section>
 
@@ -34,7 +39,8 @@ export function HowToPlayView() {
           <h2>Rules</h2>
           <ul className="how-to-rules">
             <li><strong>Drag consonants</strong> into the answer slots, or tap to select and place.</li>
-            <li>You'll be told how many <strong>vowels are hidden</strong> as a clue.</li>
+            <li>Each slot is a <strong>consonant position</strong> — don't leave gaps for vowels.</li>
+            <li>You'll be told how many <strong>vowels the word has</strong> as a clue.</li>
             <li>Submit your answer when all slots are filled.</li>
             <li>You have <strong>unlimited guesses</strong>, but each wrong guess after the first adds a <strong>15-second penalty</strong>.</li>
             <li>You can use one <strong>hint</strong> to reveal a consonant in its correct position, with a <strong>30-second penalty</strong>.</li>

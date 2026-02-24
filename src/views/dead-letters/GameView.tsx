@@ -178,7 +178,7 @@ export function GameView() {
 
         {/* Vowel hint */}
         <p className="dl-vowel-hint">
-          {state.puzzle?.vowelCount} vowel{state.puzzle?.vowelCount !== 1 ? 's' : ''} hidden
+          The hidden word has {state.puzzle?.vowelCount} vowel{state.puzzle?.vowelCount !== 1 ? 's' : ''} (not shown below)
         </p>
 
         {/* Tile tray */}
@@ -228,7 +228,7 @@ export function GameView() {
         {/* Instructions */}
         {!state.errorMessage && state.trayTiles.length > 0 && (
           <p className="game-instructions">
-            Drag consonants into the slots or tap to select and place. Arrange them in the correct order to reveal the hidden word.
+            The vowels have been removed from a word. Put the consonants in the order they appear in the word — each slot is a consonant position, not the full word. Drag or tap to place.
           </p>
         )}
 
