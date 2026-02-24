@@ -27,9 +27,16 @@ function getTodayEastern(): string {
   return `${year}-${month}-${day}`;
 }
 
-export async function handler(): Promise<void> {
+import type { Context } from 'aws-lambda';
+
+const TOPIC_NAME = 'puzzle-alerts';
+
+export async function handler(_event: unknown, context: Context): Promise<void> {
   const today = getTodayEastern();
-  const topicArn = process.env.SNS_TOPIC_ARN;
+  // Construct SNS topic ARN at runtime to avoid cross-stack circular dependency
+  const accountId = context.invokedFunctionArn.split(':')[4];
+  const region = process.env.AWS_REGION!;
+  const topicArn = `arn:aws:sns:${region}:${accountId}:${TOPIC_NAME}`;
   const issues: string[] = [];
 
   console.log(`Health check running for date: ${today}`);
@@ -83,16 +90,12 @@ export async function handler(): Promise<void> {
     const message = `Cleva.Me Health Check — ${today}\n\n${issues.join('\n')}\n\nCheck CloudWatch logs for details.`;
     console.warn('Issues found:', issues);
 
-    if (topicArn) {
-      await sns.send(new PublishCommand({
-        TopicArn: topicArn,
-        Subject: 'Cleva.Me Puzzle Alert',
-        Message: message,
-      }));
-      console.log('Alert published to SNS');
-    } else {
-      console.error('SNS_TOPIC_ARN not set — cannot send alert email');
-    }
+    await sns.send(new PublishCommand({
+      TopicArn: topicArn,
+      Subject: 'Cleva.Me Puzzle Alert',
+      Message: message,
+    }));
+    console.log('Alert published to SNS');
   } else {
     console.log('All checks passed — no alert needed');
   }

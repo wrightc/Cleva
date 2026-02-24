@@ -17,7 +17,7 @@ import { getDLPuzzle } from './functions/get-dl-puzzle/resource.js';
 import { generateDLPuzzle } from './functions/generate-dl-puzzle/resource.js';
 import { healthCheck } from './functions/health-check/resource.js';
 
-import { Function as CdkFunction, FunctionUrlAuthType, HttpMethod } from 'aws-cdk-lib/aws-lambda';
+import { FunctionUrlAuthType, HttpMethod } from 'aws-cdk-lib/aws-lambda';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -25,7 +25,7 @@ import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Alarm, ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, Stack } from 'aws-cdk-lib';
 
 const backend = defineBackend({
   getPuzzle,
@@ -147,18 +147,19 @@ dlAlarm.addAlarmAction(new SnsAction(alertTopic));
 // Health-check Lambda: daily at 05:15 UTC (15 min after puzzle generation)
 const healthCheckLambda = backend.healthCheck.resources.lambda;
 
-// Inject SNS topic ARN into the health-check Lambda environment
-(healthCheckLambda as CdkFunction).addEnvironment('SNS_TOPIC_ARN', alertTopic.topicArn);
-
-// Grant the health-check Lambda permission to publish to SNS
+// Grant sns:Publish with a name-based ARN pattern (no cross-stack reference)
 healthCheckLambda.addToRolePolicy(new PolicyStatement({
   effect: Effect.ALLOW,
   actions: ['sns:Publish'],
-  resources: [alertTopic.topicArn],
+  resources: ['arn:aws:sns:*:*:puzzle-alerts'],
 }));
 
-// Schedule health-check at 05:15 UTC daily
-new Rule(monitoringStack, 'DailyHealthCheckRule', {
+// Place EventBridge rule in the health-check Lambda's own stack to avoid
+// circular dependencies (EventBridge target adds a Lambda invoke permission
+// that would create a back-reference if placed in a different stack)
+const healthCheckStack = Stack.of(healthCheckLambda);
+
+new Rule(healthCheckStack, 'DailyHealthCheckRule', {
   ruleName: 'daily-health-check',
   description: 'Runs puzzle health checks at 05:15 UTC (15 min after generation)',
   schedule: Schedule.cron({ minute: '15', hour: '5' }),
