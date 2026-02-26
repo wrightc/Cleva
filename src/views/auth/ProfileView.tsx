@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
+import { getSupabase } from '../../lib/supabase';
 
 export function ProfileView() {
   const { user, profile, loading, signOut, setDisplayName } = useAuth();
@@ -36,7 +36,7 @@ export function ProfileView() {
     setChecking(true);
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      const { data } = await supabase
+      const { data } = await getSupabase()
         .from('profiles')
         .select('id')
         .ilike('display_name', trimmed)

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { getSupabase, supabaseEnabled } from '../lib/supabase';
 
 export interface Profile {
   id: string;
@@ -32,7 +32,7 @@ export function useAuth(): AuthContextValue {
 }
 
 async function fetchProfile(userId: string): Promise<Profile | null> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('profiles')
     .select('id, display_name, created_at')
     .eq('id', userId)
@@ -41,11 +41,13 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
   return data as Profile;
 }
 
+const noop = async () => {};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(supabaseEnabled);
   const [needsDisplayName, setNeedsDisplayName] = useState(false);
 
   const loadProfile = useCallback(async (u: User | null) => {
@@ -59,8 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setNeedsDisplayName(!p);
   }, []);
 
-  // Initialize session on mount
+  // Initialize session on mount (only if Supabase is configured)
   useEffect(() => {
+    if (!supabaseEnabled) return;
+
+    const supabase = getSupabase();
+
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
@@ -79,17 +85,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadProfile]);
 
   const signInWithEmail = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await getSupabase().auth.signInWithPassword({ email, password });
     if (error) throw error;
   }, []);
 
   const signUpWithEmail = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await getSupabase().auth.signUp({ email, password });
     if (error) throw error;
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await getSupabase().auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
@@ -97,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithApple = useCallback(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await getSupabase().auth.signInWithOAuth({
       provider: 'apple',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
@@ -105,14 +111,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await getSupabase().auth.signOut();
     if (error) throw error;
   }, []);
 
   const setDisplayName = useCallback(async (name: string) => {
     if (!user) throw new Error('Not signed in');
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('profiles')
       .upsert({ id: user.id, display_name: name })
       .select('id, display_name, created_at')
@@ -122,6 +128,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(data as Profile);
     setNeedsDisplayName(false);
   }, [user]);
+
+  // If Supabase isn't configured, provide a no-op context so the app still works
+  if (!supabaseEnabled) {
+    return (
+      <AuthContext.Provider
+        value={{
+          user: null, session: null, profile: null,
+          loading: false, needsDisplayName: false,
+          signInWithEmail: noop, signUpWithEmail: noop,
+          signInWithGoogle: noop, signInWithApple: noop,
+          signOut: noop, setDisplayName: noop,
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
+    );
+  }
 
   return (
     <AuthContext.Provider
