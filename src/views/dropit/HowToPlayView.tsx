@@ -68,23 +68,23 @@ export function HowToPlayView() {
 
       <footer className="how-to-legal">
         <p>
-          <strong>LoseIt</strong> is a free-to-play word puzzle game produced by{' '}
-          <strong>Cleva.Me Games</strong>. No purchase is necessary. This game involves no
+          <strong>DropIt</strong> is a free-to-play word puzzle game produced by{' '}
+          <strong>Open Gaming Sports Network Inc.</strong>. No purchase is necessary. This game involves no
           wagering, gambling, or monetary rewards of any kind. Leaderboard scores are for
           entertainment purposes only and carry no cash value.
         </p>
         <p>
           Player names submitted to the leaderboard are stored publicly. Do not submit personal
-          information as your display name. Cleva.Me Games reserves the right to remove any
+          information as your display name. Open Gaming Sports Network Inc. reserves the right to remove any
           name at its discretion.
         </p>
         <p>
-          This game is provided "as is" without warranty of any kind. Cleva.Me Games is not
+          This game is provided "as is" without warranty of any kind. Open Gaming Sports Network Inc. is not
           responsible for any interruptions in service, loss of data, or other issues arising
           from use of this application.
         </p>
         <p>
-          &copy; {year} Cleva.Me Games. All rights reserved.
+          &copy; {year} Open Gaming Sports Network Inc.. All rights reserved.
         </p>
       </footer>
     </div>

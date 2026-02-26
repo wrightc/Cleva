@@ -9,7 +9,7 @@ type GameContext = { prefix: string; name: string } | null;
 
 function useGameContext(): GameContext {
   const { pathname } = useLocation();
-  if (pathname.startsWith('/loseit')) return { prefix: '/loseit', name: 'LoseIt' };
+  if (pathname.startsWith('/dropit')) return { prefix: '/dropit', name: 'DropIt' };
   if (pathname.startsWith('/dead-letters')) return { prefix: '/dead-letters', name: 'Dead Letters' };
   return null;
 }

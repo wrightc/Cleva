@@ -9,7 +9,7 @@ import { Timer } from '../../components/Timer';
 
 export function GameView() {
   const navigate = useNavigate();
-  const { state, selectLetter, removeLetter, updateElapsedMs, clearPenalty, completedGame } = useGameState();
+  const { state, selectLetter, removeLetter, updateElapsedMs, clearPenalty, startGame, completedGame } = useGameState();
 
   const { formattedTime, elapsedMs } = useTimer({
     date: state.puzzle?.date ?? null,
@@ -25,7 +25,7 @@ export function GameView() {
   // Redirect to result if already played
   useEffect(() => {
     if (state.status === 'already-played' || state.status === 'complete') {
-      navigate('/loseit/result', {
+      navigate('/dropit/result', {
         replace: true,
         state: { completedGame, elapsedMs },
       });
@@ -68,6 +68,20 @@ export function GameView() {
             Try again
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // ── Ready state (waiting for player to start) ────────────────────────────
+  if (state.status === 'ready') {
+    return (
+      <div className="view view--centered">
+        <div className="game-timer-row">
+          <Timer formattedTime="00:00" />
+        </div>
+        <button className="btn btn--primary btn--large start-btn" onClick={startGame}>
+          Start
+        </button>
       </div>
     );
   }

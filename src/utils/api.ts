@@ -35,7 +35,7 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
-// ─── LoseIt API ──────────────────────────────────────────────────────────────
+// ─── DropIt API ──────────────────────────────────────────────────────────────
 
 export async function fetchPuzzle(date?: string): Promise<Puzzle> {
   const url = date ? `${URLS.getPuzzle}?date=${date}` : URLS.getPuzzle;

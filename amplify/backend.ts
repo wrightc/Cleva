@@ -45,7 +45,7 @@ const corsConfig = {
   allowedHeaders: ['*'],
 };
 
-// LoseIt function URLs
+// DropIt function URLs
 const getPuzzleLambda = backend.getPuzzle.resources.lambda;
 const getPuzzleUrl = getPuzzleLambda.addFunctionUrl({
   authType: FunctionUrlAuthType.NONE,
@@ -88,10 +88,10 @@ const generateDLPuzzleUrl = generateDLPuzzleLambda.addFunctionUrl({
 
 const cronStack = backend.createStack('CronStack');
 
-// LoseIt daily puzzle generation
+// DropIt daily puzzle generation
 new Rule(cronStack, 'DailyPuzzleRule', {
-  ruleName: 'loseit-daily-puzzle',
-  description: "Generates today's LoseIt puzzle at midnight Eastern time (05:00 UTC)",
+  ruleName: 'dropit-daily-puzzle',
+  description: "Generates today's DropIt puzzle at midnight Eastern time (05:00 UTC)",
   schedule: Schedule.cron({ minute: '0', hour: '5' }),
   targets: [new LambdaFunction(generatePuzzleLambda)],
 });
@@ -118,10 +118,10 @@ alertTopic.addSubscription(
   new EmailSubscription('cwright@metrocoresolutions.io')
 );
 
-// CloudWatch alarm: LoseIt generator errors
-const loseitAlarm = new Alarm(monitoringStack, 'LoseItGeneratorErrorAlarm', {
-  alarmName: 'loseit-generator-errors',
-  alarmDescription: 'LoseIt puzzle generator Lambda errors',
+// CloudWatch alarm: DropIt generator errors
+const dropitAlarm = new Alarm(monitoringStack, 'DropItGeneratorErrorAlarm', {
+  alarmName: 'dropit-generator-errors',
+  alarmDescription: 'DropIt puzzle generator Lambda errors',
   metric: generatePuzzleLambda.metricErrors({
     period: Duration.hours(1),
   }),
@@ -129,7 +129,7 @@ const loseitAlarm = new Alarm(monitoringStack, 'LoseItGeneratorErrorAlarm', {
   evaluationPeriods: 1,
   comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 });
-loseitAlarm.addAlarmAction(new SnsAction(alertTopic));
+dropitAlarm.addAlarmAction(new SnsAction(alertTopic));
 
 // CloudWatch alarm: Dead Letters generator errors
 const dlAlarm = new Alarm(monitoringStack, 'DLGeneratorErrorAlarm', {

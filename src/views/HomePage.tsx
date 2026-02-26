@@ -7,13 +7,13 @@ export function HomePage() {
       <p className="home-subtitle">Daily word puzzles — a new challenge every day</p>
 
       <div className="home-games">
-        <Link to="/loseit" className="game-card">
-          <h2 className="game-card__title">LoseIt</h2>
+        <Link to="/dropit" className="game-card">
+          <h2 className="game-card__title">DropIt</h2>
           <p className="game-card__description">
             Remove letters one at a time to shrink a word down to two letters.
             Every step must form a valid English word.
           </p>
-          <span className="game-card__cta btn btn--primary">Play LoseIt</span>
+          <span className="game-card__cta btn btn--primary">Play DropIt</span>
         </Link>
 
         <Link to="/dead-letters" className="game-card">

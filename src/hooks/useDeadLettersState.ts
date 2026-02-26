@@ -39,6 +39,7 @@ interface UseDeadLettersStateReturn {
   useHint: () => void;
   resetTiles: () => void;
   updateElapsedMs: (ms: number) => void;
+  startGame: () => void;
   completedGame: DLCompletedGame | null;
   secondHintAvailable: boolean;
 }
@@ -94,12 +95,14 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
         const tiles = createTiles(puzzle.consonants);
         const emptySlots: (DLTile | null)[] = new Array(puzzle.consonants.length).fill(null);
 
+        // If a timer already exists in sessionStorage, the player started before — resume directly
+        const hasTimer = sessionStorage.getItem(`dl_timer_${today}`);
         setState((s) => ({
           ...s,
           puzzle,
           trayTiles: tiles,
           slotTiles: emptySlots,
-          status: 'playing',
+          status: hasTimer ? 'playing' : 'ready',
         }));
       } catch (err) {
         if (!cancelled) {
@@ -320,6 +323,10 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
     });
   }, []);
 
+  const startGame = useCallback(() => {
+    setState((s) => (s.status === 'ready' ? { ...s, status: 'playing' } : s));
+  }, []);
+
   const resetTiles = useCallback(() => {
     setState((s) => {
       if (s.status !== 'playing' || !s.puzzle) return s;
@@ -355,6 +362,7 @@ export function useDeadLettersState(): UseDeadLettersStateReturn {
     useHint,
     resetTiles,
     updateElapsedMs,
+    startGame,
     completedGame,
     secondHintAvailable,
   };

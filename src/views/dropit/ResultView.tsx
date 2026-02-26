@@ -23,7 +23,7 @@ export function ResultView() {
 
   useEffect(() => {
     if (!completedGame) {
-      navigate('/loseit', { replace: true });
+      navigate('/dropit', { replace: true });
       return;
     }
 
@@ -76,7 +76,7 @@ export function ResultView() {
     const formatted = new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString(
       'en-US', { month: 'long', day: 'numeric' }
     );
-    const text = `LoseIt — ${formatted} | Solved in ${formattedTime} | ${window.location.origin}/loseit`;
+    const text = `DropIt — ${formatted} | Solved in ${formattedTime} | ${window.location.origin}/dropit`;
     navigator.clipboard.writeText(text).then(() => {
       setShareMessage('Copied to clipboard!');
       setTimeout(() => setShareMessage(''), 2000);

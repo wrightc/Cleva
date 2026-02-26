@@ -78,10 +78,10 @@ export const handler = async (event: FunctionUrlEvent) => {
     return jsonResponse(400, { error: 'solveTimeMs must be a positive integer' });
   }
 
-  // Validate stepCount (only required for LoseIt)
+  // Validate stepCount (only required for DropIt)
   if (game === 'loseit') {
     if (typeof stepCount !== 'number' || !Number.isInteger(stepCount) || stepCount < 6) {
-      return jsonResponse(400, { error: 'stepCount must be an integer >= 6 for LoseIt' });
+      return jsonResponse(400, { error: 'stepCount must be an integer >= 6 for DropIt' });
     }
   }
 

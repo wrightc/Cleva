@@ -31,6 +31,7 @@ interface UseGameStateReturn {
   clearPenalty: () => void;
   markSubmitted: (playerName: string) => void;
   updateElapsedMs: (ms: number) => void;
+  startGame: () => void;
   completedGame: CompletedGame | null;
 }
 
@@ -83,12 +84,14 @@ export function useGameState(): UseGameStateReturn {
           return;
         }
 
+        // If a timer already exists in sessionStorage, the player started before — resume directly
+        const hasTimer = sessionStorage.getItem(`sw_timer_${today}`);
         setState((s) => ({
           ...s,
           puzzle: puzzle as Puzzle,
           currentWord: (puzzle as Puzzle).word,
           chain: [(puzzle as Puzzle).word],
-          status: 'playing',
+          status: hasTimer ? 'playing' : 'ready',
         }));
       } catch (err) {
         if (!cancelled) {
@@ -189,6 +192,10 @@ export function useGameState(): UseGameStateReturn {
     setState((s) => ({ ...s, penaltyUntil: null, errorMessage: null }));
   }, []);
 
+  const startGame = useCallback(() => {
+    setState((s) => (s.status === 'ready' ? { ...s, status: 'playing' } : s));
+  }, []);
+
   const markSubmitted = useCallback((playerName: string) => {
     setState((s) => {
       if (!s.puzzle) return s;
@@ -213,6 +220,7 @@ export function useGameState(): UseGameStateReturn {
     clearPenalty,
     markSubmitted,
     updateElapsedMs,
+    startGame,
     completedGame,
   };
 }

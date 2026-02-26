@@ -4,7 +4,7 @@
 
 export type GameType = 'loseit' | 'dead-letters';
 
-// ─── LoseIt Puzzle ───────────────────────────────────────────────────────────
+// ─── DropIt Puzzle ───────────────────────────────────────────────────────────
 
 export interface Puzzle {
   date: string;           // ISO 8601 date string e.g. "2025-03-15"

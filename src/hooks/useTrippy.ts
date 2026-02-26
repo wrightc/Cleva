@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 
 export function useTrippy() {
   const [trippy, setTrippy] = useState(() => {
-    try { return localStorage.getItem('sw_trippy') === 'true'; }
-    catch { return false; }
+    try { return localStorage.getItem('sw_trippy') !== 'false'; }
+    catch { return true; }
   });
 
   useEffect(() => {

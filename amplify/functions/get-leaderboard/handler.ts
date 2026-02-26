@@ -2,7 +2,7 @@
  * GET /get-leaderboard?date=YYYY-MM-DD&limit=25&offset=0&game_type=loseit
  *
  * Returns ranked leaderboard entries for the specified date and game type.
- * LoseIt ranking: solve_time_ms ASC, then step_count ASC, then submitted_at ASC.
+ * DropIt ranking: solve_time_ms ASC, then step_count ASC, then submitted_at ASC.
  * Dead Letters ranking: solve_time_ms ASC, then submitted_at ASC.
  */
 
@@ -49,7 +49,7 @@ export const handler = async (event: FunctionUrlEvent) => {
       .eq('game_type', gameType)
       .order('solve_time_ms', { ascending: true });
 
-    // LoseIt uses step_count as secondary sort
+    // DropIt uses step_count as secondary sort
     if (gameType === 'loseit') {
       query = query.order('step_count', { ascending: true });
     }

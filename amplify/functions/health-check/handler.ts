@@ -2,8 +2,8 @@
  * Health-Check Lambda — runs at 05:15 UTC daily (15 min after puzzle generation).
  *
  * Checks:
- * 1. LoseIt puzzle exists for today
- * 2. LoseIt puzzle is solvable (BFS validation)
+ * 1. DropIt puzzle exists for today
+ * 2. DropIt puzzle is solvable (BFS validation)
  * 3. Dead Letters puzzle exists for today
  * 4. Dead Letters puzzle is valid (consonants length, dictionary check)
  * 5. Fallback detection on both puzzles (warning)
@@ -43,7 +43,7 @@ export async function handler(_event: unknown, context: Context): Promise<void> 
 
   const supabase = getSupabaseClient();
 
-  // ─── LoseIt checks ──────────────────────────────────────────────────────
+  // ─── DropIt checks ──────────────────────────────────────────────────────
   const { data: loseitPuzzle, error: loseitError } = await supabase
     .from('puzzles')
     .select('*')
@@ -51,16 +51,16 @@ export async function handler(_event: unknown, context: Context): Promise<void> 
     .single();
 
   if (loseitError || !loseitPuzzle) {
-    issues.push(`FAILURE: LoseIt puzzle MISSING for ${today}`);
+    issues.push(`FAILURE: DropIt puzzle MISSING for ${today}`);
   } else {
     const validation = validateWord(loseitPuzzle.word);
     if (!validation.solvable) {
-      issues.push(`FAILURE: LoseIt puzzle NOT SOLVABLE: "${loseitPuzzle.word}" — ${validation.reason}`);
+      issues.push(`FAILURE: DropIt puzzle NOT SOLVABLE: "${loseitPuzzle.word}" — ${validation.reason}`);
     }
     if (loseitPuzzle.used_fallback) {
-      issues.push(`WARNING: LoseIt used fallback word for ${today}`);
+      issues.push(`WARNING: DropIt used fallback word for ${today}`);
     }
-    console.log(`LoseIt puzzle: ${loseitPuzzle.word} (fallback: ${loseitPuzzle.used_fallback})`);
+    console.log(`DropIt puzzle: ${loseitPuzzle.word} (fallback: ${loseitPuzzle.used_fallback})`);
   }
 
   // ─── Dead Letters checks ─────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 export type GameType = 'loseit' | 'dead-letters';
 
-// ─── LoseIt Types ────────────────────────────────────────────────────────────
+// ─── DropIt Types ────────────────────────────────────────────────────────────
 
 export interface Puzzle {
   date: string;   // YYYY-MM-DD
@@ -42,6 +42,7 @@ export interface SubmitScorePayload {
 
 export type GameStatus =
   | 'loading'
+  | 'ready'
   | 'playing'
   | 'complete'
   | 'error'
@@ -88,6 +89,7 @@ export interface DLTile {
 
 export type DLGameStatus =
   | 'loading'
+  | 'ready'
   | 'playing'
   | 'complete'
   | 'error'

@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header';
 import { HomePage } from './views/HomePage';
-import { GameView as LoseItGameView } from './views/loseit/GameView';
-import { ResultView as LoseItResultView } from './views/loseit/ResultView';
-import { LeaderboardView as LoseItLeaderboardView } from './views/loseit/LeaderboardView';
-import { HowToPlayView as LoseItHowToPlayView } from './views/loseit/HowToPlayView';
+import { GameView as DropItGameView } from './views/dropit/GameView';
+import { ResultView as DropItResultView } from './views/dropit/ResultView';
+import { LeaderboardView as DropItLeaderboardView } from './views/dropit/LeaderboardView';
+import { HowToPlayView as DropItHowToPlayView } from './views/dropit/HowToPlayView';
 import { GameView as DLGameView } from './views/dead-letters/GameView';
 import { ResultView as DLResultView } from './views/dead-letters/ResultView';
 import { LeaderboardView as DLLeaderboardView } from './views/dead-letters/LeaderboardView';
@@ -23,11 +23,11 @@ function App() {
             {/* Home */}
             <Route path="/" element={<HomePage />} />
 
-            {/* LoseIt */}
-            <Route path="/loseit" element={<LoseItGameView />} />
-            <Route path="/loseit/result" element={<LoseItResultView />} />
-            <Route path="/loseit/leaderboard" element={<LoseItLeaderboardView />} />
-            <Route path="/loseit/how-to-play" element={<LoseItHowToPlayView />} />
+            {/* DropIt */}
+            <Route path="/dropit" element={<DropItGameView />} />
+            <Route path="/dropit/result" element={<DropItResultView />} />
+            <Route path="/dropit/leaderboard" element={<DropItLeaderboardView />} />
+            <Route path="/dropit/how-to-play" element={<DropItHowToPlayView />} />
 
             {/* Dead Letters */}
             <Route path="/dead-letters" element={<DLGameView />} />

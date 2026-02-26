@@ -33,6 +33,7 @@ export function GameView() {
     useHint,
     resetTiles,
     updateElapsedMs,
+    startGame,
     completedGame,
     secondHintAvailable,
   } = useDeadLettersState();
@@ -157,6 +158,20 @@ export function GameView() {
             Try again
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // ── Ready state (waiting for player to start) ────────────────────────────
+  if (state.status === 'ready') {
+    return (
+      <div className="view view--centered">
+        <div className="game-timer-row">
+          <Timer formattedTime="00:00" />
+        </div>
+        <button className="btn btn--primary btn--large start-btn" onClick={startGame}>
+          Start
+        </button>
       </div>
     );
   }
