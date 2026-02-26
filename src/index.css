@@ -1125,6 +1125,73 @@ body {
   font-weight: 800;
 }
 
+/* ── Ready / Start Screen ──────────────────────────────────── */
+
+.ready-card {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.ready-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.ready-description {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+.ready-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+}
+
+.ready-rule {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  padding-left: 20px;
+  position: relative;
+}
+
+.ready-rule::before {
+  content: '•';
+  position: absolute;
+  left: 6px;
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+/* Trippy ready card */
+[data-trippy="true"] .ready-card {
+  background: rgba(14,14,38,0.90);
+  border-color: rgba(192,132,252,0.20);
+  backdrop-filter: blur(12px);
+}
+
+[data-trippy="true"] .ready-title {
+  background: linear-gradient(90deg, #c084fc, #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* ── Trippy Floating Action Button ──────────────────────────── */
 
 .trippy-fab {
@@ -1920,6 +1987,10 @@ body {
   /* Auth responsive */
   .auth-card { padding: 24px 20px; }
   .header-signin, .header-user { font-size: 0.78rem; padding: 4px 10px; }
+
+  /* Ready card responsive */
+  .ready-card { padding: 24px 20px; }
+  .ready-title { font-size: 1.5rem; }
 
   /* Dead Letters responsive */
   .dl-tile, .dl-slot {

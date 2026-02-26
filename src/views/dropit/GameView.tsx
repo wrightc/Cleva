@@ -75,13 +75,22 @@ export function GameView() {
   // ── Ready state (waiting for player to start) ────────────────────────────
   if (state.status === 'ready') {
     return (
-      <div className="view view--centered">
-        <div className="game-timer-row">
-          <Timer formattedTime="00:00" />
+      <div className="view">
+        <div className="ready-card">
+          <h1 className="ready-title">DropIt</h1>
+          <p className="ready-description">
+            You'll see an <strong>8-letter word</strong>. Remove one letter at a time — each
+            step must form a valid English word. Shrink it down to <strong>2 letters</strong> to win!
+          </p>
+          <div className="ready-rules">
+            <div className="ready-rule">Remove <strong>one letter</strong> per step, from any position</div>
+            <div className="ready-rule">Every result must be a <strong>valid word</strong></div>
+            <div className="ready-rule">The timer starts when you hit <strong>Start</strong></div>
+          </div>
+          <button className="btn btn--primary btn--large" onClick={startGame}>
+            Start
+          </button>
         </div>
-        <button className="btn btn--primary btn--large start-btn" onClick={startGame}>
-          Start
-        </button>
       </div>
     );
   }

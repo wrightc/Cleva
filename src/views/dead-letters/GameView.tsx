@@ -165,13 +165,22 @@ export function GameView() {
   // ── Ready state (waiting for player to start) ────────────────────────────
   if (state.status === 'ready') {
     return (
-      <div className="view view--centered">
-        <div className="game-timer-row">
-          <Timer formattedTime="00:00" />
+      <div className="view">
+        <div className="ready-card">
+          <h1 className="ready-title">Dead Letters</h1>
+          <p className="ready-description">
+            The vowels have been removed from a hidden word and the <strong>consonants are
+            scrambled</strong>. Put them back in order to reveal the word!
+          </p>
+          <div className="ready-rules">
+            <div className="ready-rule"><strong>Drag or tap</strong> consonants into the answer slots</div>
+            <div className="ready-rule">Slots are <strong>consonant positions only</strong> — vowels are hidden</div>
+            <div className="ready-rule">Wrong guesses add <strong>+15s</strong>, hints add <strong>+30s</strong></div>
+          </div>
+          <button className="btn btn--primary btn--large" onClick={startGame}>
+            Start
+          </button>
         </div>
-        <button className="btn btn--primary btn--large start-btn" onClick={startGame}>
-          Start
-        </button>
       </div>
     );
   }
