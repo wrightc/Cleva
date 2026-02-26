@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
   trippy: boolean;
@@ -16,6 +17,7 @@ function useGameContext(): GameContext {
 
 export function Header({ trippy, onToggleTrippy }: HeaderProps) {
   const game = useGameContext();
+  const { user, profile, loading } = useAuth();
 
   return (
     <header className="header">
@@ -48,14 +50,27 @@ export function Header({ trippy, onToggleTrippy }: HeaderProps) {
             </nav>
           </>
         )}
-        <button
-          className={`trippy-toggle${trippy ? ' trippy-toggle--on' : ''}`}
-          onClick={onToggleTrippy}
-          title={trippy ? 'Switch to normal mode' : 'Go trippy'}
-          aria-pressed={trippy}
-        >
-          🌈
-        </button>
+        <div className="header-right">
+          {!loading && (
+            user ? (
+              <NavLink to="/profile" className="header-user">
+                {profile?.display_name ?? 'Set Name'}
+              </NavLink>
+            ) : (
+              <NavLink to="/sign-in" className="header-signin">
+                Sign In
+              </NavLink>
+            )
+          )}
+          <button
+            className={`trippy-toggle${trippy ? ' trippy-toggle--on' : ''}`}
+            onClick={onToggleTrippy}
+            title={trippy ? 'Switch to normal mode' : 'Go trippy'}
+            aria-pressed={trippy}
+          >
+            🌈
+          </button>
+        </div>
       </div>
     </header>
   );

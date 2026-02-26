@@ -43,6 +43,7 @@ export interface LeaderboardEntry {
   incorrect_submissions?: number;
   hint_used?: boolean;
   hints_used?: number;
+  user_id?: string | null;
 }
 
 export interface LeaderboardEntryWithRank extends Omit<LeaderboardEntry, 'ip_hash'> {

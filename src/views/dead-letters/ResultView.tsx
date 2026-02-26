@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { submitScore, fetchLeaderboard } from '../../utils/api';
 import { formatTime } from '../../hooks/useTimer';
+import { useAuth } from '../../contexts/AuthContext';
 import type { DLCompletedGame, LeaderboardEntry } from '../../types';
 
 const PLAYER_NAME_KEY = 'sw_player_name';
@@ -16,10 +17,13 @@ function formatPenalty(seconds: number): string {
 export function ResultView() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, profile, session } = useAuth();
   const completedGame: DLCompletedGame | null = location.state?.completedGame ?? null;
 
+  const isSignedInWithName = !!user && !!profile?.display_name;
+
   const [playerName, setPlayerName] = useState<string>(
-    () => localStorage.getItem(PLAYER_NAME_KEY) || ''
+    () => isSignedInWithName ? profile!.display_name : (localStorage.getItem(PLAYER_NAME_KEY) || '')
   );
   const [nameError, setNameError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,30 +53,38 @@ export function ResultView() {
     e.preventDefault();
 
     const trimmed = playerName.trim();
-    if (trimmed.length < 2 || trimmed.length > 20) {
-      setNameError('Name must be 2–20 characters');
-      return;
-    }
-    if (!/^[a-zA-Z0-9 ]+$/.test(trimmed)) {
-      setNameError('Only letters, numbers, and spaces allowed');
-      return;
+
+    if (!isSignedInWithName) {
+      if (trimmed.length < 2 || trimmed.length > 20) {
+        setNameError('Name must be 2-20 characters');
+        return;
+      }
+      if (!/^[a-zA-Z0-9 ]+$/.test(trimmed)) {
+        setNameError('Only letters, numbers, and spaces allowed');
+        return;
+      }
     }
 
     setNameError('');
     setIsSubmitting(true);
 
     try {
-      await submitScore({
-        playerName: trimmed,
-        solveTimeMs: totalMs,
-        stepCount: 1,
-        date,
-        gameType: 'dead-letters',
-        incorrectSubmissions,
-        hintUsed: hintsUsed > 0,
-        hintsUsed,
-      });
-      localStorage.setItem(PLAYER_NAME_KEY, trimmed);
+      await submitScore(
+        {
+          playerName: isSignedInWithName ? profile!.display_name : trimmed,
+          solveTimeMs: totalMs,
+          stepCount: 1,
+          date,
+          gameType: 'dead-letters',
+          incorrectSubmissions,
+          hintUsed: hintsUsed > 0,
+          hintsUsed,
+        },
+        session?.access_token
+      );
+      if (!isSignedInWithName) {
+        localStorage.setItem(PLAYER_NAME_KEY, trimmed);
+      }
       setSubmitted(true);
 
       const updated = await fetchLeaderboard(date, 5, 0, 'dead-letters');
@@ -157,31 +169,47 @@ export function ResultView() {
         {!submitted ? (
           <div className="result-submit">
             <h2>Add to Leaderboard</h2>
-            <form onSubmit={handleSubmit} className="name-form">
-              <label htmlFor="dl-player-name" className="name-form__label">
-                Your name
-              </label>
-              <div className="name-form__row">
-                <input
-                  id="dl-player-name"
-                  type="text"
-                  className="name-form__input"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  maxLength={20}
-                  placeholder="Enter your name"
-                  autoComplete="nickname"
-                />
+            {isSignedInWithName ? (
+              <form onSubmit={handleSubmit} className="name-form">
+                <p className="name-form__label">
+                  Submitting as <strong>{profile!.display_name}</strong>
+                </p>
+                {nameError && <p className="name-form__error">{nameError}</p>}
                 <button
                   type="submit"
                   className="btn btn--primary"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Submitting…' : 'Submit'}
+                  {isSubmitting ? 'Submitting...' : 'Submit Score'}
                 </button>
-              </div>
-              {nameError && <p className="name-form__error">{nameError}</p>}
-            </form>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="name-form">
+                <label htmlFor="dl-player-name" className="name-form__label">
+                  Your name
+                </label>
+                <div className="name-form__row">
+                  <input
+                    id="dl-player-name"
+                    type="text"
+                    className="name-form__input"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    maxLength={20}
+                    placeholder="Enter your name"
+                    autoComplete="nickname"
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn--primary"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                  </button>
+                </div>
+                {nameError && <p className="name-form__error">{nameError}</p>}
+              </form>
+            )}
           </div>
         ) : (
           <p className="result-submitted">Score submitted! Check the leaderboard.</p>
@@ -205,7 +233,7 @@ export function ResultView() {
                   <tr
                     key={entry.id}
                     className={
-                      entry.player_name === playerName && submitted
+                      entry.player_name === (isSignedInWithName ? profile!.display_name : playerName) && submitted
                         ? 'leaderboard-table__row--highlight'
                         : ''
                     }

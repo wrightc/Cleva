@@ -3,8 +3,9 @@
  *
  * Body: { playerName, solveTimeMs, stepCount, date, gameType?, incorrectSubmissions?, hintUsed? }
  *
- * Validates input, hashes the player's IP, enforces one-submission-per-IP-per-day-per-game,
- * and inserts the leaderboard entry.
+ * Two paths:
+ * - Authenticated (Authorization: Bearer <token>): validates JWT, uses display name from profile
+ * - Anonymous: existing behavior + reserved name check
  */
 
 import { createHash } from 'crypto';
@@ -58,21 +59,6 @@ export const handler = async (event: FunctionUrlEvent) => {
     ? gameType as GameType
     : 'loseit';
 
-  // Validate player name
-  if (typeof playerName !== 'string') {
-    return jsonResponse(400, { error: 'playerName must be a string' });
-  }
-  const trimmedName = playerName.trim();
-  if (trimmedName.length < 2 || trimmedName.length > 20) {
-    return jsonResponse(400, { error: 'Player name must be 2–20 characters' });
-  }
-  if (!/^[a-zA-Z0-9 ]+$/.test(trimmedName)) {
-    return jsonResponse(400, { error: 'Player name may only contain letters, numbers, and spaces' });
-  }
-  if (containsProfanity(trimmedName)) {
-    return jsonResponse(400, { error: 'Player name contains disallowed content' });
-  }
-
   // Validate solveTimeMs
   if (typeof solveTimeMs !== 'number' || solveTimeMs <= 0 || !Number.isInteger(solveTimeMs)) {
     return jsonResponse(400, { error: 'solveTimeMs must be a positive integer' });
@@ -92,7 +78,7 @@ export const handler = async (event: FunctionUrlEvent) => {
 
   const supabase = getSupabaseClient();
 
-  // Verify the puzzle exists for this date (check correct table based on game)
+  // Verify the puzzle exists for this date
   const puzzleTable = game === 'dead-letters' ? 'dl_puzzles' : 'puzzles';
   const { data: puzzle } = await supabase
     .from(puzzleTable)
@@ -102,6 +88,104 @@ export const handler = async (event: FunctionUrlEvent) => {
 
   if (!puzzle) {
     return jsonResponse(404, { error: `No puzzle found for date ${date}` });
+  }
+
+  // ─── Check for authenticated user ─────────────────────────────────────────
+  const authHeader = event.headers?.['authorization'] || event.headers?.['Authorization'];
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (token) {
+    // ── Authenticated path ────────────────────────────────────────────────
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return jsonResponse(401, { error: 'Invalid or expired token' });
+    }
+
+    // Fetch display name from profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.display_name) {
+      return jsonResponse(400, { error: 'Please set a display name before submitting' });
+    }
+
+    // Dedup by user_id + date + game_type
+    const { data: existing } = await supabase
+      .from('leaderboard')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('date', date)
+      .eq('game_type', game)
+      .single();
+
+    if (existing) {
+      return jsonResponse(409, { error: 'You have already submitted a score for today' });
+    }
+
+    const ip = getClientIp(event);
+    const ipHash = hashIp(ip);
+
+    // Build insert row
+    const row: Record<string, unknown> = {
+      date,
+      player_name: profile.display_name,
+      solve_time_ms: solveTimeMs,
+      step_count: stepCount,
+      submitted_at: new Date().toISOString(),
+      ip_hash: ipHash,
+      game_type: game,
+      user_id: user.id,
+    };
+
+    if (game === 'dead-letters') {
+      row.incorrect_submissions = typeof incorrectSubmissions === 'number' ? incorrectSubmissions : 0;
+      row.hint_used = typeof hintUsed === 'boolean' ? hintUsed : false;
+      row.hints_used = typeof hintsUsed === 'number' ? hintsUsed : 0;
+    }
+
+    const { data: entry, error } = await supabase
+      .from('leaderboard')
+      .insert(row)
+      .select('id, date, player_name, solve_time_ms, step_count, submitted_at, game_type, incorrect_submissions, hint_used, hints_used, user_id')
+      .single();
+
+    if (error) {
+      console.error('submit-score insert error:', error);
+      return jsonResponse(500, { error: 'Failed to save score' });
+    }
+
+    return jsonResponse(201, { entry });
+  }
+
+  // ── Anonymous path ──────────────────────────────────────────────────────
+  // Validate player name
+  if (typeof playerName !== 'string') {
+    return jsonResponse(400, { error: 'playerName must be a string' });
+  }
+  const trimmedName = playerName.trim();
+  if (trimmedName.length < 2 || trimmedName.length > 20) {
+    return jsonResponse(400, { error: 'Player name must be 2–20 characters' });
+  }
+  if (!/^[a-zA-Z0-9 ]+$/.test(trimmedName)) {
+    return jsonResponse(400, { error: 'Player name may only contain letters, numbers, and spaces' });
+  }
+  if (containsProfanity(trimmedName)) {
+    return jsonResponse(400, { error: 'Player name contains disallowed content' });
+  }
+
+  // Check if name is reserved by a registered user
+  const { data: reservedProfile } = await supabase
+    .from('profiles')
+    .select('id')
+    .ilike('display_name', trimmedName)
+    .limit(1);
+
+  if (reservedProfile && reservedProfile.length > 0) {
+    return jsonResponse(409, { error: 'This name is reserved by a registered user' });
   }
 
   const ip = getClientIp(event);
@@ -142,7 +226,7 @@ export const handler = async (event: FunctionUrlEvent) => {
   const { data: entry, error } = await supabase
     .from('leaderboard')
     .insert(row)
-    .select('id, date, player_name, solve_time_ms, step_count, submitted_at, game_type, incorrect_submissions, hint_used, hints_used')
+    .select('id, date, player_name, solve_time_ms, step_count, submitted_at, game_type, incorrect_submissions, hint_used, hints_used, user_id')
     .single();
 
   if (error) {

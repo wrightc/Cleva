@@ -1582,6 +1582,314 @@ body {
   text-shadow: 0 0 6px rgba(192,132,252,0.5);
 }
 
+/* ── Header Right (auth + trippy) ──────────────────────────── */
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.header-signin,
+.header-user {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 5px 14px;
+  border-radius: 99px;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.header-signin {
+  color: #a1a1aa;
+  border: 1.5px solid rgba(255,255,255,0.12);
+}
+
+.header-signin:hover {
+  color: #ffffff;
+  border-color: rgba(255,255,255,0.30);
+  background: rgba(255,255,255,0.06);
+}
+
+.header-user {
+  color: #a5b4fc;
+  background: rgba(99,102,241,0.15);
+}
+
+.header-user:hover {
+  background: rgba(99,102,241,0.25);
+  color: #c7d2fe;
+}
+
+/* ── Auth Views ────────────────────────────────────────────── */
+
+.auth-card {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.auth-message {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.auth-input {
+  padding: 12px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+.auth-error {
+  color: var(--color-removed);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.auth-footer {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.auth-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* ── OAuth Buttons ─────────────────────────────────────────── */
+
+.auth-oauth {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: 2px solid var(--color-border);
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  width: 100%;
+}
+
+.oauth-btn:hover {
+  transform: translateY(-1px);
+}
+
+.oauth-btn--google {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.oauth-btn--google:hover {
+  border-color: #4285f4;
+  background: rgba(66,133,244,0.04);
+}
+
+.oauth-btn--apple {
+  background: var(--color-text);
+  color: var(--color-surface);
+  border-color: var(--color-text);
+}
+
+.oauth-btn--apple:hover {
+  opacity: 0.9;
+}
+
+/* ── Auth Divider ──────────────────────────────────────────── */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1.5px;
+  background: var(--color-border);
+}
+
+/* ── Name Availability ─────────────────────────────────────── */
+
+.name-check-wrap {
+  position: relative;
+}
+
+.name-availability {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.name-availability--checking { color: var(--color-text-muted); }
+.name-availability--available { color: var(--color-success); }
+.name-availability--taken { color: var(--color-removed); }
+
+/* ── Profile View ──────────────────────────────────────────── */
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.profile-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-name-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-name-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Auth Trippy Theme ─────────────────────────────────────── */
+
+[data-trippy="true"] .auth-card {
+  background: rgba(14,14,38,0.90);
+  border-color: rgba(192,132,252,0.20);
+  backdrop-filter: blur(12px);
+}
+
+[data-trippy="true"] .auth-input {
+  background: rgba(16,16,42,0.85);
+  border-color: rgba(192,132,252,0.28);
+  color: var(--color-text);
+}
+
+[data-trippy="true"] .auth-input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 0 3px rgba(192,132,252,0.18);
+}
+
+[data-trippy="true"] .oauth-btn--google {
+  background: rgba(16,16,42,0.85);
+  border-color: rgba(192,132,252,0.28);
+  color: var(--color-text);
+}
+
+[data-trippy="true"] .oauth-btn--apple {
+  background: rgba(200,200,255,0.9);
+  border-color: transparent;
+  color: #0a0a1a;
+}
+
+[data-trippy="true"] .auth-divider::before,
+[data-trippy="true"] .auth-divider::after {
+  background: rgba(192,132,252,0.20);
+}
+
+[data-trippy="true"] .header-signin {
+  color: rgba(200,185,255,0.6);
+  border-color: rgba(192,132,252,0.25);
+}
+
+[data-trippy="true"] .header-signin:hover {
+  color: #e0d0ff;
+  border-color: rgba(192,132,252,0.50);
+  background: rgba(192,132,252,0.10);
+}
+
+[data-trippy="true"] .header-user {
+  color: #d8b4fe;
+  background: rgba(192,132,252,0.18);
+}
+
+[data-trippy="true"] .header-user:hover {
+  background: rgba(192,132,252,0.30);
+  color: #f0abfc;
+}
+
 /* ── Responsive ─────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
@@ -1611,6 +1919,10 @@ body {
   .home-title { font-size: 1.8rem; }
   .home-games { grid-template-columns: 1fr; }
   .game-card { padding: 20px 18px; }
+
+  /* Auth responsive */
+  .auth-card { padding: 24px 20px; }
+  .header-signin, .header-user { font-size: 0.78rem; padding: 4px 10px; }
 
   /* Dead Letters responsive */
   .dl-tile, .dl-slot {

@@ -52,11 +52,16 @@ export async function fetchDLPuzzle(date?: string): Promise<DLPuzzle> {
 // ─── Shared API ──────────────────────────────────────────────────────────────
 
 export async function submitScore(
-  payload: SubmitScorePayload
+  payload: SubmitScorePayload,
+  accessToken?: string
 ): Promise<{ entry: LeaderboardEntry }> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
   return apiFetch<{ entry: LeaderboardEntry }>(URLS.submitScore, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(payload),
   });
 }

@@ -9,6 +9,12 @@ import { GameView as DLGameView } from './views/dead-letters/GameView';
 import { ResultView as DLResultView } from './views/dead-letters/ResultView';
 import { LeaderboardView as DLLeaderboardView } from './views/dead-letters/LeaderboardView';
 import { HowToPlayView as DLHowToPlayView } from './views/dead-letters/HowToPlayView';
+import { SignInView } from './views/auth/SignInView';
+import { SignUpView } from './views/auth/SignUpView';
+import { AuthCallbackView } from './views/auth/AuthCallbackView';
+import { ChooseNameView } from './views/auth/ChooseNameView';
+import { ProfileView } from './views/auth/ProfileView';
+import { AuthProvider } from './contexts/AuthContext';
 import { useTrippy } from './hooks/useTrippy';
 
 function App() {
@@ -16,27 +22,36 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="app">
-        <Header trippy={trippy} onToggleTrippy={toggle} />
-        <main className="main">
-          <Routes>
-            {/* Home */}
-            <Route path="/" element={<HomePage />} />
+      <AuthProvider>
+        <div className="app">
+          <Header trippy={trippy} onToggleTrippy={toggle} />
+          <main className="main">
+            <Routes>
+              {/* Home */}
+              <Route path="/" element={<HomePage />} />
 
-            {/* DropIt */}
-            <Route path="/dropit" element={<DropItGameView />} />
-            <Route path="/dropit/result" element={<DropItResultView />} />
-            <Route path="/dropit/leaderboard" element={<DropItLeaderboardView />} />
-            <Route path="/dropit/how-to-play" element={<DropItHowToPlayView />} />
+              {/* DropIt */}
+              <Route path="/dropit" element={<DropItGameView />} />
+              <Route path="/dropit/result" element={<DropItResultView />} />
+              <Route path="/dropit/leaderboard" element={<DropItLeaderboardView />} />
+              <Route path="/dropit/how-to-play" element={<DropItHowToPlayView />} />
 
-            {/* Dead Letters */}
-            <Route path="/dead-letters" element={<DLGameView />} />
-            <Route path="/dead-letters/result" element={<DLResultView />} />
-            <Route path="/dead-letters/leaderboard" element={<DLLeaderboardView />} />
-            <Route path="/dead-letters/how-to-play" element={<DLHowToPlayView />} />
-          </Routes>
-        </main>
-      </div>
+              {/* Dead Letters */}
+              <Route path="/dead-letters" element={<DLGameView />} />
+              <Route path="/dead-letters/result" element={<DLResultView />} />
+              <Route path="/dead-letters/leaderboard" element={<DLLeaderboardView />} />
+              <Route path="/dead-letters/how-to-play" element={<DLHowToPlayView />} />
+
+              {/* Auth */}
+              <Route path="/sign-in" element={<SignInView />} />
+              <Route path="/sign-up" element={<SignUpView />} />
+              <Route path="/auth/callback" element={<AuthCallbackView />} />
+              <Route path="/choose-name" element={<ChooseNameView />} />
+              <Route path="/profile" element={<ProfileView />} />
+            </Routes>
+          </main>
+        </div>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
