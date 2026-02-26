@@ -24,7 +24,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <div className="app">
-          <Header trippy={trippy} onToggleTrippy={toggle} />
+          <Header />
           <main className="main">
             <Routes>
               {/* Home */}
@@ -50,6 +50,14 @@ function App() {
               <Route path="/profile" element={<ProfileView />} />
             </Routes>
           </main>
+          <button
+            className={`trippy-fab${trippy ? ' trippy-fab--on' : ''}`}
+            onClick={toggle}
+            title={trippy ? 'Switch to normal mode' : 'Go trippy'}
+            aria-pressed={trippy}
+          >
+            🌈
+          </button>
         </div>
       </AuthProvider>
     </BrowserRouter>

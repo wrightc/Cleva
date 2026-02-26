@@ -1125,35 +1125,39 @@ body {
   font-weight: 800;
 }
 
-/* ── Trippy Toggle Button ────────────────────────────────────── */
+/* ── Trippy Floating Action Button ──────────────────────────── */
 
-.trippy-toggle {
-  background: transparent;
-  border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 99px;
-  width: 36px;
-  height: 36px;
+.trippy-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 200;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
 }
 
-.trippy-toggle:hover {
+.trippy-fab:hover {
   transform: scale(1.15) rotate(20deg);
-  border-color: rgba(255,255,255,0.35);
+  box-shadow: var(--shadow-lg);
 }
 
-.trippy-toggle--on {
+.trippy-fab--on {
   animation: trippy-btn-spin 8s linear infinite;
   border-color: transparent;
-  background: linear-gradient(#18181b, #18181b) padding-box,
+  background: linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
               linear-gradient(135deg, #f0abfc, #818cf8, #67e8f9, #86efac, #fde68a, #f0abfc) border-box;
-  box-shadow: 0 0 12px rgba(192,132,252,0.55);
+  box-shadow: 0 0 16px rgba(192,132,252,0.55);
 }
 
 @keyframes trippy-btn-spin {
@@ -1582,15 +1586,6 @@ body {
   text-shadow: 0 0 6px rgba(192,132,252,0.5);
 }
 
-/* ── Header Right (auth + trippy) ──────────────────────────── */
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: auto;
-}
-
 .header-signin,
 .header-user {
   font-size: 0.85rem;
@@ -1600,6 +1595,8 @@ body {
   border-radius: 99px;
   transition: color 0.15s, background 0.15s;
   white-space: nowrap;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .header-signin {
