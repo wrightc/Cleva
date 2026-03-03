@@ -138,15 +138,19 @@ async function generatePuzzle(): Promise<GenerationResult> {
     const validation = validateWord(fallbackWord);
     if (!validation.solvable || !validation.path) continue;
 
-    // Check if this fallback word was already used recently
+    // Skip if used in the last 15 days
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 15);
+    const cutoffDate = cutoff.toISOString().slice(0, 10);
+
     const { data: existing } = await supabase
       .from('puzzles')
       .select('date')
       .eq('word', fallbackWord)
-      .order('date', { ascending: false })
+      .gte('date', cutoffDate)
       .limit(1);
 
-    if (existing && existing.length > 0) continue; // Skip recently used
+    if (existing && existing.length > 0) continue;
 
     const { error } = await supabase.from('puzzles').upsert({
       date: targetDate,

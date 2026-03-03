@@ -64,22 +64,15 @@ const FALLBACK_WORDS: Array<{ word: string; difficulty: number }> = [
   { word: 'PHANTOM', difficulty: 3 },
   { word: 'KITCHEN', difficulty: 2 },
   { word: 'CAPTAIN', difficulty: 2 },
-  { word: 'DOLPHIN', difficulty: 3 },
   { word: 'WHISPER', difficulty: 3 },
   { word: 'DRAGON', difficulty: 3 },
   { word: 'PLASTIC', difficulty: 3 },
-  { word: 'CHAPTER', difficulty: 2 },
-  { word: 'GLIMPSE', difficulty: 3 },
-  { word: 'MONSTER', difficulty: 2 },
   { word: 'BLANKET', difficulty: 3 },
   { word: 'WHISTLE', difficulty: 3 },
   { word: 'SHELTER', difficulty: 2 },
   { word: 'WESTERN', difficulty: 2 },
   { word: 'STRANGE', difficulty: 3 },
-  { word: 'PROBLEM', difficulty: 2 },
-  { word: 'TRUMPET', difficulty: 3 },
   { word: 'LOBSTER', difficulty: 3 },
-  { word: 'MONSTER', difficulty: 2 },
 ];
 
 interface ClaudeResponse {
@@ -222,12 +215,16 @@ async function generatePuzzle() {
     const validation = validateWord(fallback.word, wordSet);
     if (!validation.valid) continue;
 
-    // Check if recently used
+    // Skip if used in the last 15 days
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 15);
+    const cutoffDate = cutoff.toISOString().slice(0, 10);
+
     const { data: existing } = await supabase
       .from('dl_puzzles')
       .select('date')
       .eq('word', fallback.word)
-      .order('date', { ascending: false })
+      .gte('date', cutoffDate)
       .limit(1);
 
     if (existing && existing.length > 0) continue;
