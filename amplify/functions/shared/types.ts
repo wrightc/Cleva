@@ -31,6 +31,19 @@ export interface DLPuzzle {
 
 // ─── Leaderboard ─────────────────────────────────────────────────────────────
 
+export type LeaderboardPeriod = 'daily' | 'weekly' | 'monthly';
+
+export interface AggregatedLeaderboardEntry {
+  rank: number;
+  user_id: string;
+  player_name: string;
+  total_time_ms: number;
+  avg_time_ms: number;
+  days_played: number;
+  total_days: number;
+  best_time_ms: number;
+}
+
 export interface LeaderboardEntry {
   id: string;
   date: string;

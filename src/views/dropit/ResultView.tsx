@@ -194,7 +194,14 @@ export function ResultView() {
             )}
           </div>
         ) : (
-          <p className="result-submitted">Score submitted! Check the leaderboard.</p>
+          <>
+            <p className="result-submitted">Score submitted! Check the leaderboard.</p>
+            {!user && (
+              <p className="result-auth-cta">
+                <a href="/sign-up">Create an account</a> or <a href="/sign-in">sign in</a> to appear on weekly and monthly leaderboards!
+              </p>
+            )}
+          </>
         )}
 
         {/* Leaderboard preview */}

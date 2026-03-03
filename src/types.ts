@@ -1,4 +1,5 @@
 export type GameType = 'loseit' | 'dead-letters';
+export type LeaderboardPeriod = 'daily' | 'weekly' | 'monthly';
 
 // ─── DropIt Types ────────────────────────────────────────────────────────────
 
@@ -25,6 +26,28 @@ export interface LeaderboardEntry {
 export interface LeaderboardResponse {
   date: string;
   entries: LeaderboardEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface AggregatedLeaderboardEntry {
+  rank: number;
+  user_id: string;
+  player_name: string;
+  total_time_ms: number;
+  avg_time_ms: number;
+  days_played: number;
+  total_days: number;
+  best_time_ms: number;
+}
+
+export interface AggregatedLeaderboardResponse {
+  period: 'weekly' | 'monthly';
+  startDate: string;
+  endDate: string;
+  totalDays: number;
+  entries: AggregatedLeaderboardEntry[];
   total: number;
   limit: number;
   offset: number;

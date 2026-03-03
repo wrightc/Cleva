@@ -3,7 +3,7 @@
  * URLs are injected via Vite environment variables (VITE_*).
  */
 
-import type { Puzzle, DLPuzzle, LeaderboardResponse, SubmitScorePayload, LeaderboardEntry, GameType } from '../types';
+import type { Puzzle, DLPuzzle, LeaderboardResponse, AggregatedLeaderboardResponse, SubmitScorePayload, LeaderboardEntry, GameType, LeaderboardPeriod } from '../types';
 
 const URLS = {
   getPuzzle: import.meta.env.VITE_GET_PUZZLE_URL as string,
@@ -74,4 +74,15 @@ export async function fetchLeaderboard(
 ): Promise<LeaderboardResponse> {
   const url = `${URLS.getLeaderboard}?date=${date}&limit=${limit}&offset=${offset}&game_type=${gameType}`;
   return apiFetch<LeaderboardResponse>(url);
+}
+
+export async function fetchAggregatedLeaderboard(
+  period: 'weekly' | 'monthly',
+  date: string,
+  limit = 25,
+  offset = 0,
+  gameType: GameType = 'loseit'
+): Promise<AggregatedLeaderboardResponse> {
+  const url = `${URLS.getLeaderboard}?date=${date}&limit=${limit}&offset=${offset}&game_type=${gameType}&period=${period}`;
+  return apiFetch<AggregatedLeaderboardResponse>(url);
 }
