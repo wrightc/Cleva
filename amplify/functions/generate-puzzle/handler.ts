@@ -37,9 +37,13 @@ interface GenerationResult {
 
 async function generateWithClaude(
   client: Anthropic,
-  previousFailures: Array<{ word: string; reason: string }> = []
+  previousFailures: Array<{ word: string; reason: string }> = [],
+  recentWords: string[] = []
 ): Promise<string> {
   const messages: Anthropic.MessageParam[] = [];
+  const avoidClause = recentWords.length > 0
+    ? `\nDo NOT use any of these recently used words: ${recentWords.join(', ')}.`
+    : '';
 
   if (previousFailures.length === 0) {
     messages.push({
@@ -49,7 +53,7 @@ async function generateWithClaude(
         'The word must be common and recognizable to a general adult audience. ' +
         'Exclude proper nouns, abbreviations, hyphenated words, and words requiring diacritical marks. ' +
         'The word should work well for a letter-removal puzzle where each step removing one letter ' +
-        'creates another valid English word, ending at a 2-letter word.',
+        'creates another valid English word, ending at a 2-letter word.' + avoidClause,
     });
   } else {
     const failureList = previousFailures
@@ -60,7 +64,7 @@ async function generateWithClaude(
       content:
         `The following words were rejected:\n${failureList}\n\n` +
         'Return a different single 8-letter English word only — no explanation, punctuation, or surrounding text. ' +
-        'The word must be common, recognizable, and form a chain of valid English words when letters are removed one at a time, ending at a 2-letter word.',
+        'The word must be common, recognizable, and form a chain of valid English words when letters are removed one at a time, ending at a 2-letter word.' + avoidClause,
     });
   }
 
@@ -83,6 +87,17 @@ async function generatePuzzle(): Promise<GenerationResult> {
   // Target date: today in Eastern time (cron fires at 05:00 UTC = midnight ET)
   const targetDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
+  // Fetch words used in the last 30 days to avoid repeats
+  const cutoff30 = new Date();
+  cutoff30.setDate(cutoff30.getDate() - 30);
+  const cutoff30Date = cutoff30.toISOString().slice(0, 10);
+  const { data: recentPuzzles } = await supabase
+    .from('puzzles')
+    .select('word')
+    .gte('date', cutoff30Date);
+  const recentWords = (recentPuzzles ?? []).map(p => p.word as string);
+  const recentWordSet = new Set(recentWords);
+
   const failures: Array<{ word: string; reason: string }> = [];
   let attempts = 0;
 
@@ -91,7 +106,7 @@ async function generatePuzzle(): Promise<GenerationResult> {
     let word: string;
 
     try {
-      word = await generateWithClaude(anthropic, failures);
+      word = await generateWithClaude(anthropic, failures, recentWords);
     } catch (err) {
       console.error(`Claude API error on attempt ${attempts}:`, err);
       failures.push({ word: '(API error)', reason: 'Claude API call failed' });
@@ -100,6 +115,13 @@ async function generatePuzzle(): Promise<GenerationResult> {
 
     if (!word || word.length !== 8) {
       failures.push({ word: word || '(empty)', reason: 'Response was not an 8-letter word' });
+      continue;
+    }
+
+    // Reject if used in the last 30 days
+    if (recentWordSet.has(word)) {
+      console.log(`Attempt ${attempts}: Word "${word}" used in last 30 days, skipping`);
+      failures.push({ word, reason: 'Used in last 30 days' });
       continue;
     }
 

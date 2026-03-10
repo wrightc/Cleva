@@ -83,9 +83,13 @@ interface ClaudeResponse {
 
 async function generateWithClaude(
   client: Anthropic,
-  previousFailures: Array<{ word: string; reason: string }> = []
+  previousFailures: Array<{ word: string; reason: string }> = [],
+  recentWords: string[] = []
 ): Promise<ClaudeResponse> {
   let prompt: string;
+  const avoidClause = recentWords.length > 0
+    ? `\nDo NOT use any of these recently used words: ${recentWords.join(', ')}.`
+    : '';
 
   if (previousFailures.length === 0) {
     prompt =
@@ -101,7 +105,7 @@ async function generateWithClaude(
       '- Exclude proper nouns, abbreviations, hyphenated words, and words with diacritical marks\n' +
       '- Y is treated as a consonant\n' +
       '- Difficulty factors: word length, consonant cluster density, word familiarity, duplicate consonants\n\n' +
-      'Return ONLY the JSON object, no other text.';
+      'Return ONLY the JSON object, no other text.' + avoidClause;
   } else {
     const failureList = previousFailures
       .map((f) => `- "${f.word}": ${f.reason}`)
@@ -110,7 +114,7 @@ async function generateWithClaude(
       `The following words were rejected for the Dead Letters puzzle:\n${failureList}\n\n` +
       'Return a different word as a JSON object with fields: "word", "difficulty" (1-5), "rationale".\n' +
       'Requirements: 4-12 letters, common English, ≥3 consonants after removing vowels (A,E,I,O,U), ' +
-      'no proper nouns. Return ONLY the JSON object.';
+      'no proper nouns. Return ONLY the JSON object.' + avoidClause;
   }
 
   const response = await client.messages.create({
@@ -158,6 +162,17 @@ async function generatePuzzle() {
   // Target date: today in Eastern time
   const targetDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
+  // Fetch words used in the last 30 days to avoid repeats
+  const cutoff30 = new Date();
+  cutoff30.setDate(cutoff30.getDate() - 30);
+  const cutoff30Date = cutoff30.toISOString().slice(0, 10);
+  const { data: recentPuzzles } = await supabase
+    .from('dl_puzzles')
+    .select('word')
+    .gte('date', cutoff30Date);
+  const recentWords = (recentPuzzles ?? []).map(p => p.word as string);
+  const recentWordSet = new Set(recentWords);
+
   const failures: Array<{ word: string; reason: string }> = [];
   let attempts = 0;
 
@@ -166,7 +181,7 @@ async function generatePuzzle() {
     let result: ClaudeResponse;
 
     try {
-      result = await generateWithClaude(anthropic, failures);
+      result = await generateWithClaude(anthropic, failures, recentWords);
     } catch (err) {
       console.error(`Claude API error on attempt ${attempts}:`, err);
       failures.push({ word: '(API error)', reason: 'Claude API call failed' });
@@ -174,6 +189,14 @@ async function generatePuzzle() {
     }
 
     console.log(`Attempt ${attempts}: Testing word "${result.word}"`);
+
+    // Reject if used in the last 30 days
+    if (recentWordSet.has(result.word)) {
+      console.log(`Attempt ${attempts}: Word "${result.word}" used in last 30 days, skipping`);
+      failures.push({ word: result.word, reason: 'Used in last 30 days' });
+      continue;
+    }
+
     const validation = validateWord(result.word, wordSet);
 
     if (validation.valid) {
