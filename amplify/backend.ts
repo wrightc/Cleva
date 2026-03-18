@@ -84,23 +84,42 @@ const generateDLPuzzleUrl = generateDLPuzzleLambda.addFunctionUrl({
   cors: corsConfig,
 });
 
-// ─── EventBridge Rules (daily cron at 05:00 UTC = midnight ET) ───────────
+// ─── EventBridge Rules (daily cron for puzzle generation) ─────────────────
+// Midnight Eastern = 05:00 UTC during EST, 04:00 UTC during EDT.
+// We fire at BOTH hours so puzzles are ready at midnight year-round.
+// The generators use upsert, so the second invocation is a safe no-op.
 
 const cronStack = backend.createStack('CronStack');
 
-// DropIt daily puzzle generation
+// DropIt daily puzzle generation (EST: midnight, EDT: 1 AM — safe duplicate)
 new Rule(cronStack, 'DailyPuzzleRule', {
   ruleName: 'dropit-daily-puzzle',
-  description: "Generates today's DropIt puzzle at midnight Eastern time (05:00 UTC)",
+  description: "Generates today's DropIt puzzle at 05:00 UTC (midnight EST)",
   schedule: Schedule.cron({ minute: '0', hour: '5' }),
   targets: [new LambdaFunction(generatePuzzleLambda)],
 });
 
-// Dead Letters daily puzzle generation
+// DropIt daily puzzle generation — EDT coverage (midnight EDT = 04:00 UTC)
+new Rule(cronStack, 'DailyPuzzleRuleEDT', {
+  ruleName: 'dropit-daily-puzzle-edt',
+  description: "Generates today's DropIt puzzle at 04:00 UTC (midnight EDT)",
+  schedule: Schedule.cron({ minute: '0', hour: '4' }),
+  targets: [new LambdaFunction(generatePuzzleLambda)],
+});
+
+// Dead Letters daily puzzle generation (EST: midnight, EDT: 1 AM — safe duplicate)
 new Rule(cronStack, 'DailyDLPuzzleRule', {
   ruleName: 'dead-letters-daily-puzzle',
-  description: "Generates today's Dead Letters puzzle at midnight Eastern time (05:00 UTC)",
+  description: "Generates today's Dead Letters puzzle at 05:00 UTC (midnight EST)",
   schedule: Schedule.cron({ minute: '0', hour: '5' }),
+  targets: [new LambdaFunction(generateDLPuzzleLambda)],
+});
+
+// Dead Letters daily puzzle generation — EDT coverage (midnight EDT = 04:00 UTC)
+new Rule(cronStack, 'DailyDLPuzzleRuleEDT', {
+  ruleName: 'dead-letters-daily-puzzle-edt',
+  description: "Generates today's Dead Letters puzzle at 04:00 UTC (midnight EDT)",
+  schedule: Schedule.cron({ minute: '0', hour: '4' }),
   targets: [new LambdaFunction(generateDLPuzzleLambda)],
 });
 
@@ -159,9 +178,17 @@ healthCheckLambda.addToRolePolicy(new PolicyStatement({
 // that would create a back-reference if placed in a different stack)
 const healthCheckStack = Stack.of(healthCheckLambda);
 
+// Run health check after both possible generation windows (EDT and EST)
+new Rule(healthCheckStack, 'DailyHealthCheckRuleEDT', {
+  ruleName: 'daily-health-check-edt',
+  description: 'Runs puzzle health checks at 04:15 UTC (15 min after EDT generation)',
+  schedule: Schedule.cron({ minute: '15', hour: '4' }),
+  targets: [new LambdaFunction(healthCheckLambda)],
+});
+
 new Rule(healthCheckStack, 'DailyHealthCheckRule', {
   ruleName: 'daily-health-check',
-  description: 'Runs puzzle health checks at 05:15 UTC (15 min after generation)',
+  description: 'Runs puzzle health checks at 05:15 UTC (15 min after EST generation)',
   schedule: Schedule.cron({ minute: '15', hour: '5' }),
   targets: [new LambdaFunction(healthCheckLambda)],
 });
