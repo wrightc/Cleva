@@ -35,6 +35,13 @@ interface GenerationResult {
   example_solution_path: string[];
 }
 
+// Letters weighted toward those that start many common 8-letter English words
+const STARTING_LETTERS = 'ABCDEFGHJKLMNPRSTW'.split('');
+
+function randomStartingLetter(): string {
+  return STARTING_LETTERS[Math.floor(Math.random() * STARTING_LETTERS.length)];
+}
+
 async function generateWithClaude(
   client: Anthropic,
   previousFailures: Array<{ word: string; reason: string }> = [],
@@ -44,12 +51,13 @@ async function generateWithClaude(
   const avoidClause = recentWords.length > 0
     ? `\nDo NOT use any of these recently used words: ${recentWords.join(', ')}.`
     : '';
+  const startLetter = randomStartingLetter();
 
   if (previousFailures.length === 0) {
     messages.push({
       role: 'user',
       content:
-        'Return a single 8-letter English word only — no explanation, punctuation, or surrounding text. ' +
+        `Return a single 8-letter English word starting with "${startLetter}" — no explanation, punctuation, or surrounding text. ` +
         'The word must be common and recognizable to a general adult audience. ' +
         'Exclude proper nouns, abbreviations, hyphenated words, and words requiring diacritical marks. ' +
         'The word should work well for a letter-removal puzzle where each step removing one letter ' +
@@ -63,7 +71,7 @@ async function generateWithClaude(
       role: 'user',
       content:
         `The following words were rejected:\n${failureList}\n\n` +
-        'Return a different single 8-letter English word only — no explanation, punctuation, or surrounding text. ' +
+        `Return a different single 8-letter English word starting with "${startLetter}" — no explanation, punctuation, or surrounding text. ` +
         'The word must be common, recognizable, and form a chain of valid English words when letters are removed one at a time, ending at a 2-letter word.' + avoidClause,
     });
   }
@@ -101,7 +109,7 @@ async function generatePuzzle(): Promise<GenerationResult> {
   const failures: Array<{ word: string; reason: string }> = [];
   let attempts = 0;
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     attempts++;
     let word: string;
 

@@ -81,6 +81,13 @@ interface ClaudeResponse {
   rationale: string;
 }
 
+// Letters weighted toward those that start many common English words
+const STARTING_LETTERS = 'ABCDEFGHJKLMNPRSTW'.split('');
+
+function randomStartingLetter(): string {
+  return STARTING_LETTERS[Math.floor(Math.random() * STARTING_LETTERS.length)];
+}
+
 async function generateWithClaude(
   client: Anthropic,
   previousFailures: Array<{ word: string; reason: string }> = [],
@@ -90,6 +97,7 @@ async function generateWithClaude(
   const avoidClause = recentWords.length > 0
     ? `\nDo NOT use any of these recently used words: ${recentWords.join(', ')}.`
     : '';
+  const startLetter = randomStartingLetter();
 
   if (previousFailures.length === 0) {
     prompt =
@@ -101,6 +109,7 @@ async function generateWithClaude(
       '- "difficulty": an integer 1-5 rating the puzzle difficulty\n' +
       '- "rationale": a brief explanation of the difficulty rating\n\n' +
       'Requirements:\n' +
+      `- The word MUST start with the letter "${startLetter}"\n` +
       '- The word must have at least 3 consonants remaining after removing all vowels\n' +
       '- Exclude proper nouns, abbreviations, hyphenated words, and words with diacritical marks\n' +
       '- Y is treated as a consonant\n' +
@@ -112,7 +121,7 @@ async function generateWithClaude(
       .join('\n');
     prompt =
       `The following words were rejected for the Dead Letters puzzle:\n${failureList}\n\n` +
-      'Return a different word as a JSON object with fields: "word", "difficulty" (1-5), "rationale".\n' +
+      `Return a different word starting with "${startLetter}" as a JSON object with fields: "word", "difficulty" (1-5), "rationale".\n` +
       'Requirements: 4-12 letters, common English, ≥3 consonants after removing vowels (A,E,I,O,U), ' +
       'no proper nouns. Return ONLY the JSON object.' + avoidClause;
   }
@@ -176,7 +185,7 @@ async function generatePuzzle() {
   const failures: Array<{ word: string; reason: string }> = [];
   let attempts = 0;
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     attempts++;
     let result: ClaudeResponse;
 
