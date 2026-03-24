@@ -85,13 +85,14 @@ export interface GameState {
   isStuck: boolean;              // no valid next moves exist
 }
 
-/** Stored in localStorage when a puzzle is completed */
+/** Stored in localStorage when a puzzle is completed (or stuck) */
 export interface CompletedGame {
   date: string;
   chain: string[];
   elapsedMs: number;
   submitted: boolean;
   playerName?: string;
+  stuck?: boolean;
 }
 
 // ─── Dead Letters Types ──────────────────────────────────────────────────────

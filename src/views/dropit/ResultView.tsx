@@ -39,7 +39,7 @@ export function ResultView() {
 
   if (!completedGame) return null;
 
-  const { date, chain, elapsedMs } = completedGame;
+  const { date, chain, elapsedMs, stuck } = completedGame;
   const stepCount = chain.length - 1; // excludes the starting word
   const formattedTime = formatTime(elapsedMs);
   const extraSteps = stepCount - MINIMUM_STEPS;
@@ -105,50 +105,80 @@ export function ResultView() {
   return (
     <div className="view view--result">
       <div className="result-card">
-        <h1 className="result-title">Puzzle Complete!</h1>
+        <h1 className="result-title">{stuck ? 'Stuck!' : 'Puzzle Complete!'}</h1>
 
-        <div className="result-stats">
-          <div className="result-stat">
-            <span className="result-stat__label">Time</span>
-            <span className="result-stat__value result-stat__value--time">{formattedTime}</span>
-          </div>
-          <div className="result-stat">
-            <span className="result-stat__label">Steps</span>
-            <span className="result-stat__value">
-              {stepCount}
-              {extraSteps > 0 && (
-                <span className="result-stat__extra"> (+{extraSteps} extra)</span>
-              )}
-            </span>
-          </div>
-        </div>
+        {stuck ? (
+          <>
+            <p className="result-stuck-message">
+              No valid words could be formed from <strong>{chain[chain.length - 1]}</strong>.
+              Better luck tomorrow!
+            </p>
 
-        {/* Solution chain */}
-        <div className="result-chain">
-          <h2 className="result-chain__title">Your Solution</h2>
-          <div className="result-chain__words">
-            {chain.map((word, i) => (
-              <span key={i} className="result-chain__word">
-                {word}
-                {i < chain.length - 1 && <span className="result-chain__arrow"> → </span>}
-              </span>
-            ))}
-          </div>
-        </div>
+            {/* Progress chain */}
+            <div className="result-chain">
+              <h2 className="result-chain__title">Your Progress</h2>
+              <div className="result-chain__words">
+                {chain.map((word, i) => (
+                  <span key={i} className="result-chain__word">
+                    {word}
+                    {i < chain.length - 1 && <span className="result-chain__arrow"> → </span>}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-        {/* Share button */}
-        <button className="btn btn--secondary" onClick={handleShare}>
-          {shareMessage || 'Share Result'}
-        </button>
+            {/* Come back tomorrow */}
+            <p className="result-comeback">
+              A new puzzle is available every day at{' '}
+              <strong>midnight Eastern time</strong>.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="result-stats">
+              <div className="result-stat">
+                <span className="result-stat__label">Time</span>
+                <span className="result-stat__value result-stat__value--time">{formattedTime}</span>
+              </div>
+              <div className="result-stat">
+                <span className="result-stat__label">Steps</span>
+                <span className="result-stat__value">
+                  {stepCount}
+                  {extraSteps > 0 && (
+                    <span className="result-stat__extra"> (+{extraSteps} extra)</span>
+                  )}
+                </span>
+              </div>
+            </div>
 
-        {/* Come back tomorrow */}
-        <p className="result-comeback">
-          Come back tomorrow for a new word! A new puzzle is available every day at{' '}
-          <strong>midnight Eastern time</strong>.
-        </p>
+            {/* Solution chain */}
+            <div className="result-chain">
+              <h2 className="result-chain__title">Your Solution</h2>
+              <div className="result-chain__words">
+                {chain.map((word, i) => (
+                  <span key={i} className="result-chain__word">
+                    {word}
+                    {i < chain.length - 1 && <span className="result-chain__arrow"> → </span>}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-        {/* Score submission */}
-        {!submitted ? (
+            {/* Share button */}
+            <button className="btn btn--secondary" onClick={handleShare}>
+              {shareMessage || 'Share Result'}
+            </button>
+
+            {/* Come back tomorrow */}
+            <p className="result-comeback">
+              Come back tomorrow for a new word! A new puzzle is available every day at{' '}
+              <strong>midnight Eastern time</strong>.
+            </p>
+          </>
+        )}
+
+        {/* Score submission — only for completed games, not stuck */}
+        {!stuck && !submitted && (
           <div className="result-submit">
             <h2>Add to Leaderboard</h2>
             {isSignedInWithName ? (
@@ -193,7 +223,8 @@ export function ResultView() {
               </form>
             )}
           </div>
-        ) : (
+        )}
+        {!stuck && submitted && (
           <>
             <p className="result-submitted">Score submitted! Check the leaderboard.</p>
             {!user && (

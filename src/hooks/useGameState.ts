@@ -168,6 +168,18 @@ export function useGameState(): UseGameStateReturn {
       // Check if the player is now stuck (no valid one-letter removals)
       const stuck = !canContinue(newWord);
 
+      if (stuck) {
+        const stuckGame: CompletedGame = {
+          date: s.puzzle!.date,
+          chain: newChain,
+          elapsedMs: s.elapsedMs,
+          submitted: false,
+          stuck: true,
+        };
+        saveCompletedGame(stuckGame);
+        setCompletedGame(stuckGame);
+      }
+
       return {
         ...s,
         chain: newChain,
@@ -176,6 +188,7 @@ export function useGameState(): UseGameStateReturn {
         errorMessage: null,
         penaltyUntil: null,
         isStuck: stuck,
+        status: stuck ? 'already-played' : s.status,
       };
     });
   }, []);
