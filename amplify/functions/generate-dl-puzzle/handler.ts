@@ -105,12 +105,14 @@ async function generateWithClaude(
       'In this game, all vowels (A, E, I, O, U) are removed from a word, leaving only consonants. ' +
       'Players must arrange the scrambled consonants in the correct order.\n\n' +
       'Return a JSON object with exactly these fields:\n' +
-      '- "word": a single common English word (4-12 letters), recognizable to a general adult audience\n' +
+      '- "word": a single common English word (5-8 letters), recognizable to a general adult audience\n' +
       '- "difficulty": an integer 1-5 rating the puzzle difficulty\n' +
       '- "rationale": a brief explanation of the difficulty rating\n\n' +
       'Requirements:\n' +
       `- The word MUST start with the letter "${startLetter}"\n` +
+      '- The word must be between 5 and 8 letters long — no longer\n' +
       '- The word must have at least 3 consonants remaining after removing all vowels\n' +
+      '- The word must appear in a standard Scrabble dictionary (ENABLE word list)\n' +
       '- Exclude proper nouns, abbreviations, hyphenated words, and words with diacritical marks\n' +
       '- Y is treated as a consonant\n' +
       '- Difficulty factors: word length, consonant cluster density, word familiarity, duplicate consonants\n\n' +
@@ -122,7 +124,7 @@ async function generateWithClaude(
     prompt =
       `The following words were rejected for the Dead Letters puzzle:\n${failureList}\n\n` +
       `Return a different word starting with "${startLetter}" as a JSON object with fields: "word", "difficulty" (1-5), "rationale".\n` +
-      'Requirements: 4-12 letters, common English, ≥3 consonants after removing vowels (A,E,I,O,U), ' +
+      'Requirements: 5-8 letters only, common English, must be in a Scrabble dictionary, ≥3 consonants after removing vowels (A,E,I,O,U), ' +
       'no proper nouns. Return ONLY the JSON object.' + avoidClause;
   }
 
@@ -150,8 +152,8 @@ async function generateWithClaude(
 }
 
 function validateWord(word: string, wordSet: Set<string>): { valid: boolean; reason?: string } {
-  if (!word || word.length < 4 || word.length > 12) {
-    return { valid: false, reason: `Word "${word}" must be 4-12 letters (got ${word?.length || 0})` };
+  if (!word || word.length < 5 || word.length > 8) {
+    return { valid: false, reason: `Word "${word}" must be 5-8 letters (got ${word?.length || 0})` };
   }
   if (!wordSet.has(word.toUpperCase())) {
     return { valid: false, reason: `Word "${word}" not found in dictionary` };
