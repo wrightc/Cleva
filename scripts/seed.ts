@@ -10,6 +10,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { validateWord } from '../amplify/functions/shared/validator.js';
+import { SOLVABLE_8_LETTER_WORDS } from '../amplify/functions/shared/solvable-words.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -23,15 +24,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
-// Pre-validated 8-letter words for seeding (validator confirms each one)
-const CANDIDATE_WORDS = [
-  'ABRIDGED', 'ABRIDGES', 'BLASTERS', 'BLATHERS', 'BOUNCERS', 'BROWSERS',
-  'BURSTING', 'CAROUSEL', 'CHANTERS', 'CHATTERS', 'CHEATERS', 'CLATTERS',
-  'FLATTERS', 'GAMBLERS', 'GRANTING', 'GRUMBLES', 'HONESTLY', 'MANAGERS',
-  'PLANTERS', 'PLATTERS', 'PRINCESS', 'RATTLERS', 'ROADSTER', 'SHOPPING',
-  'SLANTING', 'SPLATTER', 'STARLING', 'STARTING', 'STINGERS', 'STRIKERS',
-  'SWEATING', 'THEATERS', 'THROWING', 'WRAPPING', 'WRINKLED',
-];
+const CANDIDATE_WORDS = SOLVABLE_8_LETTER_WORDS;
 
 async function seed() {
   console.log('Validating candidate words...');

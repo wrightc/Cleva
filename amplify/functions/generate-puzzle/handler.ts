@@ -2,30 +2,20 @@
  * generate-puzzle Lambda handler
  *
  * Invoked by:
- *   1. AWS EventBridge Scheduler daily at 00:00 UTC (generates tomorrow's puzzle)
+ *   1. AWS EventBridge Scheduler daily at 05:00 UTC (midnight ET)
  *   2. HTTP POST with x-admin-secret header (manual trigger for development/testing)
  *
  * Algorithm:
- *   1. Call Claude API (claude-sonnet-4-6) requesting a 7-letter word
- *   2. Run BFS solvability validator
- *   3. If valid → store in Supabase
- *   4. If invalid → retry up to 5 times with failure context
- *   5. If all retries fail → select from fallback word list
+ *   1. Pick a random word from the pre-computed pool of solvable 8-letter words
+ *   2. Skip words used in the last 30 days
+ *   3. Re-validate with BFS as a sanity check
+ *   4. Store in Supabase
  */
 
-import Anthropic from '@anthropic-ai/sdk';
 import { getSupabaseClient, jsonResponse } from '../shared/supabase.js';
 import { validateWord } from '../shared/validator.js';
+import { SOLVABLE_8_LETTER_WORDS } from '../shared/solvable-words.js';
 import type { FunctionUrlEvent } from '../shared/types.js';
-
-// Pre-validated 8-letter fallback words (used if Claude API fails all retries)
-const FALLBACK_WORDS: string[] = [
-  'ABRIDGED', 'ABRIDGES', 'BLASTERS', 'BLATHERS', 'BOUNCERS', 'BROWSERS',
-  'BURSTING', 'CAROUSEL', 'CHANTERS', 'CHATTERS', 'CHEATERS', 'CLATTERS',
-  'FLATTERS', 'GAMBLERS', 'GRANTING', 'GRUMBLES', 'HONESTLY', 'MANAGERS',
-  'PLANTERS', 'PLATTERS', 'PRINCESS', 'RATTLERS', 'ROADSTER', 'SHOPPING',
-  'SLANTING', 'SPLATTER', 'STARLING', 'STARTING', 'STINGERS', 'STRIKERS',
-];
 
 interface GenerationResult {
   date: string;
@@ -35,181 +25,77 @@ interface GenerationResult {
   example_solution_path: string[];
 }
 
-// Letters weighted toward those that start many common 8-letter English words
-const STARTING_LETTERS = 'ABCDEFGHJKLMNPRSTW'.split('');
-
-function randomStartingLetter(): string {
-  return STARTING_LETTERS[Math.floor(Math.random() * STARTING_LETTERS.length)];
-}
-
-async function generateWithClaude(
-  client: Anthropic,
-  previousFailures: Array<{ word: string; reason: string }> = [],
-  recentWords: string[] = []
-): Promise<string> {
-  const messages: Anthropic.MessageParam[] = [];
-  const avoidClause = recentWords.length > 0
-    ? `\nDo NOT use any of these recently used words: ${recentWords.join(', ')}.`
-    : '';
-  const startLetter = randomStartingLetter();
-
-  if (previousFailures.length === 0) {
-    messages.push({
-      role: 'user',
-      content:
-        `Return a single 8-letter English word starting with "${startLetter}" — no explanation, punctuation, or surrounding text. ` +
-        'The word must be common and recognizable to a general adult audience. ' +
-        'Exclude proper nouns, abbreviations, hyphenated words, and words requiring diacritical marks. ' +
-        'The word should work well for a letter-removal puzzle where each step removing one letter ' +
-        'creates another valid English word, ending at a 2-letter word.' + avoidClause,
-    });
-  } else {
-    const failureList = previousFailures
-      .map((f) => `- "${f.word}": ${f.reason}`)
-      .join('\n');
-    messages.push({
-      role: 'user',
-      content:
-        `The following words were rejected:\n${failureList}\n\n` +
-        `Return a different single 8-letter English word starting with "${startLetter}" — no explanation, punctuation, or surrounding text. ` +
-        'The word must be common, recognizable, and form a chain of valid English words when letters are removed one at a time, ending at a 2-letter word.' + avoidClause,
-    });
+/**
+ * Shuffle an array in place (Fisher-Yates).
+ */
+function shuffle<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 20,
-    temperature: 0.9,
-    messages,
-  });
-
-  const text = response.content[0].type === 'text' ? response.content[0].text : '';
-  // Extract just the word (strip punctuation, whitespace, quotes)
-  return text.trim().replace(/[^A-Za-z]/g, '').toUpperCase();
+  return arr;
 }
 
 async function generatePuzzle(): Promise<GenerationResult> {
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const supabase = getSupabaseClient();
 
   // Target date: today in Eastern time (cron fires at 05:00 UTC = midnight ET)
   const targetDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
   // Fetch words used in the last 30 days to avoid repeats
-  const cutoff30 = new Date();
-  cutoff30.setDate(cutoff30.getDate() - 30);
-  const cutoff30Date = cutoff30.toISOString().slice(0, 10);
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  const cutoffDate = cutoff.toISOString().slice(0, 10);
   const { data: recentPuzzles } = await supabase
     .from('puzzles')
     .select('word')
-    .gte('date', cutoff30Date);
-  const recentWords = (recentPuzzles ?? []).map(p => p.word as string);
-  const recentWordSet = new Set(recentWords);
+    .gte('date', cutoffDate);
+  const recentWordSet = new Set((recentPuzzles ?? []).map(p => p.word as string));
 
-  const failures: Array<{ word: string; reason: string }> = [];
+  // Shuffle the pool and pick the first word not used recently
+  const candidates = shuffle([...SOLVABLE_8_LETTER_WORDS]);
   let attempts = 0;
 
-  for (let i = 0; i < 10; i++) {
+  for (const word of candidates) {
     attempts++;
-    let word: string;
 
-    try {
-      word = await generateWithClaude(anthropic, failures, recentWords);
-    } catch (err) {
-      console.error(`Claude API error on attempt ${attempts}:`, err);
-      failures.push({ word: '(API error)', reason: 'Claude API call failed' });
-      continue;
-    }
-
-    if (!word || word.length !== 8) {
-      failures.push({ word: word || '(empty)', reason: 'Response was not an 8-letter word' });
-      continue;
-    }
-
-    // Reject if used in the last 30 days
     if (recentWordSet.has(word)) {
-      console.log(`Attempt ${attempts}: Word "${word}" used in last 30 days, skipping`);
-      failures.push({ word, reason: 'Used in last 30 days' });
       continue;
     }
 
-    console.log(`Attempt ${attempts}: Testing word "${word}"`);
+    // Sanity-check BFS validation (should always pass for pre-computed words)
     const validation = validateWord(word);
-
-    if (validation.solvable && validation.path) {
-      // Store in Supabase
-      const { error } = await supabase.from('puzzles').upsert({
-        date: targetDate,
-        word,
-        generated_at: new Date().toISOString(),
-        generation_attempts: attempts,
-        used_fallback: false,
-        example_solution_path: validation.path,
-      });
-
-      if (error) throw new Error(`Supabase insert error: ${error.message}`);
-
-      return {
-        date: targetDate,
-        word,
-        generation_attempts: attempts,
-        used_fallback: false,
-        example_solution_path: validation.path,
-      };
+    if (!validation.solvable || !validation.path) {
+      console.warn(`Pre-computed word "${word}" failed re-validation: ${validation.reason}`);
+      continue;
     }
 
-    failures.push({ word, reason: validation.reason || 'No valid solution path' });
-  }
-
-  // All retries exhausted — use fallback word list
-  console.warn('All Claude retries failed. Using fallback word list.', { failures });
-
-  for (const fallbackWord of FALLBACK_WORDS) {
-    const validation = validateWord(fallbackWord);
-    if (!validation.solvable || !validation.path) continue;
-
-    // Skip if used in the last 15 days
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 15);
-    const cutoffDate = cutoff.toISOString().slice(0, 10);
-
-    const { data: existing } = await supabase
-      .from('puzzles')
-      .select('date')
-      .eq('word', fallbackWord)
-      .gte('date', cutoffDate)
-      .limit(1);
-
-    if (existing && existing.length > 0) continue;
+    console.log(`Selected word "${word}" after checking ${attempts} candidates`);
 
     const { error } = await supabase.from('puzzles').upsert({
       date: targetDate,
-      word: fallbackWord,
+      word,
       generated_at: new Date().toISOString(),
       generation_attempts: attempts,
-      used_fallback: true,
+      used_fallback: false,
       example_solution_path: validation.path,
     });
 
     if (error) throw new Error(`Supabase insert error: ${error.message}`);
 
-    // Log alert for operator
-    console.error('ALERT: Fallback word list was used for puzzle generation', {
-      date: targetDate,
-      word: fallbackWord,
-      failures,
-    });
-
     return {
       date: targetDate,
-      word: fallbackWord,
+      word,
       generation_attempts: attempts,
-      used_fallback: true,
+      used_fallback: false,
       example_solution_path: validation.path,
     };
   }
 
-  throw new Error('All fallback words exhausted. Manual intervention required.');
+  throw new Error(
+    `All ${SOLVABLE_8_LETTER_WORDS.length} words were used in the last 30 days. ` +
+    'This should not happen with a pool of 276 words.'
+  );
 }
 
 export const handler = async (event: FunctionUrlEvent | Record<string, unknown>) => {

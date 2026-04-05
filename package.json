@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/generate-wordlist.mjs",
+    "prebuild": "node scripts/generate-wordlist.mjs && node scripts/generate-solvable-words.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-wordlist": "node scripts/generate-wordlist.mjs",
+    "generate-solvable-words": "node scripts/generate-solvable-words.mjs",
     "seed": "dotenv -e .env -- npx tsx scripts/seed.ts",
     "seed-dl": "dotenv -e .env -- npx tsx scripts/seed-dl.ts"
   },
